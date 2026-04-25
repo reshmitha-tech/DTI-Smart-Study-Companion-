@@ -73,12 +73,12 @@ It generates personalized study plans, improves focus, tracks progress, and moti
 ## 🤖 Chatbot Configuration  
 
 ### 🔹 Default Behavior  
-The chatbot works using a **rule-based system**, so it functions even without any external API.
+- The chatbot works using a **rule-based system**, so it functions even without any external API.
 
 ---
 
 ### 🔹 Optional AI Integration  
-To enable advanced AI responses:
+- To enable advanced AI responses:
 
 1. Create a `.env` file in the project root
 2. API_KEY=your_api_key_here
@@ -88,42 +88,46 @@ To enable advanced AI responses:
 ---
 
 bash
-pip install python-dotenv
-Update backend code to load API key securely
-⚠️ Note
-API keys are not included in this repository for security reasons
-If no API key is provided, chatbot automatically uses fallback responses
-🔄 Project Structure
+
+- pip install python-dotenv
+
+- Update backend code to load API key securely
+
+- ⚠️ Note
+- API keys are not included in this repository for security reasons
+- If no API key is provided, chatbot automatically uses fallback responses
+  
+- 🔄 Project Structure
 
 smart-study-companion/
-│
-├── app.py
-├── templates/
-│   └── index.html
-├── static/
-│   ├── style.css
-│   └── script.js
+- │
+- ├── app.py
+- ├── templates/
+- │   └── index.html
+- ├── static/
+- │   ├── style.css
+- │   └── script.js
 
-▶️ How to Run
-Clone the repository
+- ▶️ How to Run
+- Clone the repository
 
-Bash
-git clone https://github.com/your-username/smart-study-companion.git
-Navigate to project folder
-Bash
-cd smart-study-companion
+- Bash
+- git clone https://github.com/your-username/smart-study-companion.git
+- Navigate to project folder
 
-Install dependencies
-Bash
-pip install flask python-dotenv
+- Bash
+- cd smart-study-companion
 
-Run the application
+- Install dependencies
+- Bash
+- pip install flask python-dotenv
 
-Bash
-python app.py
+- Run the application
+- Bash
+- python app.py
 
-Open browser
-http://127.0.0.1:5000/
+- Open browser
+- http://127.0.0.1:5000/
 
 
 🌟 Key Highlights
