@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Scholarly | Study Assistant</title>
+  <meta name="description" content="Get study tips, focus advice, revision strategies, and motivation from your personal Study Assistant."/>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script>
+    tailwind.config={darkMode:"class",theme:{extend:{colors:{"primary-fixed":"#d4e3ff","surface-container":"#1a194a","secondary-fixed":"#e2dfff","inverse-on-surface":"#2b2b5b","surface":"#0d0b3d","error":"#ffb4ab","surface-container-lowest":"#070539","primary-container":"#002242","on-secondary-fixed-variant":"#3b3b94","inverse-primary":"#0060ac","tertiary":"#3cd7ff","outline":"#918f9d","on-surface":"#e2dfff","on-background":"#e2dfff","surface-bright":"#343465","on-primary-fixed-variant":"#004883","on-error-container":"#ffdad6","tertiary-container":"#00252f","secondary":"#c1c1ff","primary-fixed-dim":"#a4c9ff","on-primary-container":"#448bdc","primary":"#a4c9ff","on-tertiary-fixed":"#001f27","on-error":"#690005","secondary-container":"#3b3b94","error-container":"#93000a","on-tertiary":"#003642","secondary-fixed-dim":"#c1c1ff","surface-variant":"#2f2f60","surface-dim":"#0d0b3d","on-tertiary-container":"#0095b4","outline-variant":"#464651","on-secondary-fixed":"#0b016a","on-tertiary-fixed-variant":"#004e5f","on-secondary":"#24227d","on-primary":"#00315d","surface-tint":"#a4c9ff","on-surface-variant":"#c7c5d3","on-primary-fixed":"#001c39","tertiary-fixed-dim":"#3cd7ff","surface-container-high":"#242455","surface-container-low":"#161545","inverse-surface":"#e2dfff","background":"#0d0b3d","surface-container-highest":"#2f2f60","on-secondary-container":"#adadff","tertiary-fixed":"#b4ebff"},borderRadius:{DEFAULT:"0.25rem",lg:"0.5rem",xl:"0.75rem",full:"9999px"},fontFamily:{headline:["Manrope"],body:["Manrope"],label:["Manrope"]}}}};
+  </script>
+  <link rel="stylesheet" href="css/shared.css"/>
+</head>
+<body class="bg-surface text-on-surface min-h-screen overflow-x-hidden">
+
+  <div id="nav-mount"></div>
+  <div class="flex min-h-[calc(100vh-5rem)]">
+    <div id="sidebar-mount"></div>
+
+    <main class="flex-1 md:ml-72 p-6 md:p-12 flex flex-col" style="height: calc(100vh - 5rem);">
+      <div class="max-w-3xl mx-auto w-full flex flex-col flex-1">
+
+        <!-- Header -->
+        <div class="mb-6 animate-fade-in shrink-0">
+          <div class="flex items-center gap-4 mb-2">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-on-primary-container flex items-center justify-center shadow-lg shadow-primary/20">
+              <span class="material-symbols-outlined text-white text-2xl" style="font-variation-settings:'FILL'1">smart_toy</span>
+            </div>
+            <div>
+              <h1 class="text-2xl font-extrabold tracking-tight text-primary-fixed">Study Assistant</h1>
+              <p class="text-on-surface-variant text-xs uppercase tracking-widest">Powered by Scholarly AI · Flask Backend</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chat Messages -->
+        <div id="chat-messages" class="flex-1 overflow-y-auto space-y-4 mb-6 pr-2 flex flex-col">
+        </div>
+
+        <!-- Quick Actions -->
+        <div id="quick-actions" class="flex flex-wrap gap-2 mb-4 shrink-0 animate-fade-in animate-fade-in-delay-2"></div>
+
+        <!-- Input Area -->
+        <div class="bg-surface-container-low rounded-xl p-3 flex items-center gap-3 shrink-0 shadow-xl border border-outline-variant/10 animate-fade-in animate-fade-in-delay-3">
+          <input id="chat-input" type="text" placeholder="Ask me anything about studying..."
+            class="flex-1 bg-transparent border-none text-on-surface text-sm focus:outline-none placeholder:text-on-surface-variant/50 py-2 px-2"/>
+          <button id="send-btn" class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-on-primary hover:opacity-90 active:scale-90 transition-all shrink-0">
+            <span class="material-symbols-outlined text-lg">send</span>
+          </button>
+        </div>
+
+        <p class="text-center text-[10px] text-on-surface-variant/40 mt-3 uppercase tracking-widest shrink-0">
+          Study Assistant provides general study advice. Not a replacement for professional tutoring.
+        </p>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/store.js"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/gamification.js"></script>
+  <script src="js/chatbot.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      Nav.init('side-session');
+
+      const chatMessages = document.getElementById('chat-messages');
+      const chatInput = document.getElementById('chat-input');
+      const sendBtn = document.getElementById('send-btn');
+      const quickActions = document.getElementById('quick-actions');
+
+      // Greeting (async — from Flask)
+      const greeting = await Chatbot.getGreeting();
+      addBotMessage(greeting);
+
+      // Quick actions
+      const actions = Chatbot.getQuickActions();
+      quickActions.innerHTML = actions.map(a =>
+        `<button class="quick-action-btn px-4 py-2 bg-surface-container-highest rounded-full text-xs font-bold text-on-surface-variant hover:text-primary hover:bg-surface-container-highest/80 transition-all active:scale-95 border border-outline-variant/10" data-message="${escapeAttr(a.message)}">
+          ${a.label}
+        </button>`
+      ).join('');
+
+      // Quick action click handlers
+      document.querySelectorAll('.quick-action-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const msg = btn.getAttribute('data-message');
+          chatInput.value = msg;
+          sendMessage();
+        });
+      });
+
+      // Send message (async)
+      async function sendMessage() {
+        const text = chatInput.value.trim();
+        if (!text) return;
+        addUserMessage(text);
+        chatInput.value = '';
+
+        // Show typing indicator
+        const typingEl = addTypingIndicator();
+
+        // Get response from Flask API
+        const response = await Chatbot.getResponse(text);
+
+        typingEl.remove();
+        addBotMessage(response);
+      }
+
+      sendBtn.addEventListener('click', sendMessage);
+      chatInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter') sendMessage();
+      });
+
+      chatInput.focus();
+    });
+
+    function addUserMessage(text) {
+      const chatMessages = document.getElementById('chat-messages');
+      const div = document.createElement('div');
+      div.className = 'flex justify-end';
+      div.innerHTML = `<div class="chat-bubble user">${escapeHtml(text)}</div>`;
+      chatMessages.appendChild(div);
+      scrollToBottom();
+    }
+
+    function addBotMessage(text) {
+      const chatMessages = document.getElementById('chat-messages');
+      const div = document.createElement('div');
+      div.className = 'flex justify-start';
+      div.innerHTML = `
+        <div class="flex items-start gap-3 max-w-[85%]">
+          <div class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center shrink-0 mt-1">
+            <span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings:'FILL'1">smart_toy</span>
+          </div>
+          <div class="chat-bubble bot">${escapeHtml(text)}</div>
+        </div>`;
+      chatMessages.appendChild(div);
+      scrollToBottom();
+    }
+
+    function addTypingIndicator() {
+      const chatMessages = document.getElementById('chat-messages');
+      const div = document.createElement('div');
+      div.className = 'flex justify-start typing-indicator';
+      div.innerHTML = `
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center shrink-0 mt-1">
+            <span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings:'FILL'1">smart_toy</span>
+          </div>
+          <div class="chat-bubble bot flex items-center gap-2">
+            <div class="flex gap-1">
+              <span class="w-2 h-2 bg-primary/40 rounded-full animate-bounce" style="animation-delay:0ms"></span>
+              <span class="w-2 h-2 bg-primary/40 rounded-full animate-bounce" style="animation-delay:150ms"></span>
+              <span class="w-2 h-2 bg-primary/40 rounded-full animate-bounce" style="animation-delay:300ms"></span>
+            </div>
+          </div>
+        </div>`;
+      chatMessages.appendChild(div);
+      scrollToBottom();
+      return div;
+    }
+
+    function scrollToBottom() {
+      const chatMessages = document.getElementById('chat-messages');
+      setTimeout(() => chatMessages.scrollTop = chatMessages.scrollHeight, 50);
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function escapeAttr(text) {
+      return text.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+  </script>
+</body>
+</html>

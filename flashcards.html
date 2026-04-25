@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Scholarly | Flashcards</title>
+  <meta name="description" content="Study with spaced repetition flashcards. Create decks, flip cards, and track your retention rate."/>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script>
+    tailwind.config={darkMode:"class",theme:{extend:{colors:{"primary-fixed":"#d4e3ff","surface-container":"#1a194a","secondary-fixed":"#e2dfff","inverse-on-surface":"#2b2b5b","surface":"#0d0b3d","error":"#ffb4ab","surface-container-lowest":"#070539","primary-container":"#002242","on-secondary-fixed-variant":"#3b3b94","inverse-primary":"#0060ac","tertiary":"#3cd7ff","outline":"#918f9d","on-surface":"#e2dfff","on-background":"#e2dfff","surface-bright":"#343465","on-primary-fixed-variant":"#004883","on-error-container":"#ffdad6","tertiary-container":"#00252f","secondary":"#c1c1ff","primary-fixed-dim":"#a4c9ff","on-primary-container":"#448bdc","primary":"#a4c9ff","on-tertiary-fixed":"#001f27","on-error":"#690005","secondary-container":"#3b3b94","error-container":"#93000a","on-tertiary":"#003642","secondary-fixed-dim":"#c1c1ff","surface-variant":"#2f2f60","surface-dim":"#0d0b3d","on-tertiary-container":"#0095b4","outline-variant":"#464651","on-secondary-fixed":"#0b016a","on-tertiary-fixed-variant":"#004e5f","on-secondary":"#24227d","on-primary":"#00315d","surface-tint":"#a4c9ff","on-surface-variant":"#c7c5d3","on-primary-fixed":"#001c39","tertiary-fixed-dim":"#3cd7ff","surface-container-high":"#242455","surface-container-low":"#161545","inverse-surface":"#e2dfff","background":"#0d0b3d","surface-container-highest":"#2f2f60","on-secondary-container":"#adadff","tertiary-fixed":"#b4ebff"},borderRadius:{DEFAULT:"0.25rem",lg:"0.5rem",xl:"0.75rem",full:"9999px"},fontFamily:{headline:["Manrope"],body:["Manrope"],label:["Manrope"]}}}};
+  </script>
+  <link rel="stylesheet" href="css/shared.css"/>
+</head>
+<body class="bg-surface text-on-surface min-h-screen overflow-x-hidden">
+
+  <div id="nav-mount"></div>
+  <div class="flex min-h-[calc(100vh-5rem)]">
+    <div id="sidebar-mount"></div>
+
+    <main class="ml-0 md:ml-72 flex-1 p-6 md:p-12 bg-surface min-h-screen">
+
+      <!-- Deck Selection View -->
+      <div id="deck-view" class="max-w-5xl mx-auto">
+        <div class="mb-10 animate-fade-in">
+          <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight text-primary-fixed mb-4">Flashcard Decks</h1>
+          <p class="text-on-surface-variant text-lg max-w-2xl">Select a deck to start studying, or create a new one. Spaced repetition helps you remember more with less effort.</p>
+        </div>
+
+        <!-- Create Deck -->
+        <div class="bg-surface-container-low p-6 rounded-xl mb-8 animate-fade-in animate-fade-in-delay-1">
+          <h3 class="text-sm font-bold text-primary uppercase tracking-widest mb-4 flex items-center gap-2">
+            <span class="material-symbols-outlined">add_circle</span> Create New Deck
+          </h3>
+          <div class="flex gap-3">
+            <input id="new-deck-name" type="text" placeholder="Deck name (e.g. Biology Chapter 3)"
+              class="flex-1 bg-surface-container-lowest border border-outline-variant/30 rounded-lg py-3 px-4 text-on-surface focus:outline-none focus:border-primary/50"/>
+            <input id="new-deck-subject" type="text" placeholder="Subject"
+              class="w-40 bg-surface-container-lowest border border-outline-variant/30 rounded-lg py-3 px-4 text-on-surface focus:outline-none focus:border-primary/50"/>
+            <button id="create-deck-btn" class="px-6 py-3 bg-primary text-on-primary rounded-lg font-bold text-sm active:scale-95 transition-transform">Create</button>
+          </div>
+        </div>
+
+        <!-- Deck Grid -->
+        <div id="deck-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in animate-fade-in-delay-2">
+          <!-- Populated by JS -->
+        </div>
+        <div id="no-decks" class="hidden bg-surface-container-low rounded-xl p-16 text-center mt-8">
+          <span class="material-symbols-outlined text-6xl text-on-surface-variant/20 mb-4 block">style</span>
+          <p class="text-on-surface-variant text-lg">No decks yet. Create one above to get started!</p>
+        </div>
+      </div>
+
+      <!-- Study Session View (hidden by default) -->
+      <div id="study-view" class="hidden max-w-4xl mx-auto">
+        <!-- Session Header -->
+        <div class="mb-8">
+          <button id="back-to-decks" class="flex items-center gap-2 text-primary font-bold text-sm mb-4 hover:underline">
+            <span class="material-symbols-outlined text-sm">arrow_back</span> Back to Decks
+          </button>
+          <div class="flex justify-between items-end mb-6">
+            <div>
+              <span class="text-primary font-bold text-xs uppercase tracking-[0.2em] mb-2 block">Active Recall Session</span>
+              <h1 id="study-deck-name" class="text-3xl md:text-4xl font-headline font-extrabold tracking-tight text-on-surface">Deck Name</h1>
+            </div>
+            <div class="text-right">
+              <div class="text-on-surface-variant text-sm font-medium mb-1">Progress</div>
+              <div id="study-progress-text" class="text-2xl font-black text-primary tracking-tighter">0 / 0</div>
+            </div>
+          </div>
+          <div class="h-2 w-full bg-surface-container-high rounded-full overflow-hidden">
+            <div id="study-progress-bar" class="h-full signature-gradient rounded-full transition-all duration-500" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-12 gap-8 items-start">
+          <!-- Card Area -->
+          <div class="col-span-12 lg:col-span-8">
+            <!-- Flashcard -->
+            <div id="flashcard-container" class="relative cursor-pointer" onclick="handleFlip()">
+              <div id="card-front" class="active-recall-card min-h-[400px] md:min-h-[480px] rounded-xl border-4 border-primary/40 shadow-[0_40px_60px_-15px_rgba(7,5,57,0.8)] p-8 md:p-12 flex flex-col items-center justify-center text-center relative overflow-hidden transition-all duration-300 hover:border-primary">
+                <div class="absolute -top-24 -right-24 w-64 h-64 bg-primary/5 rounded-full blur-3xl"></div>
+                <div class="absolute -bottom-24 -left-24 w-64 h-64 bg-primary/10 rounded-full blur-3xl"></div>
+                <span class="material-symbols-outlined text-primary/30 text-6xl mb-6">help</span>
+                <h2 id="card-text" class="text-2xl md:text-3xl font-headline font-bold text-on-primary-fixed leading-tight max-w-lg">
+                  Loading...
+                </h2>
+                <div class="mt-10">
+                  <div id="flip-hint" class="px-8 py-3 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-bold uppercase tracking-widest flex items-center gap-2">
+                    <span class="material-symbols-outlined text-sm">visibility</span>
+                    Tap to flip card
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Rating Controls -->
+            <div id="rating-controls" class="mt-8 grid grid-cols-3 gap-4 md:gap-6 hidden">
+              <button onclick="rateCard('hard')" class="group flex flex-col items-center justify-center p-4 md:p-6 bg-surface-container-low rounded-xl border border-transparent hover:border-error/30 transition-all active:scale-95">
+                <span class="text-error font-headline font-black text-lg mb-1 tracking-tighter">Hard</span>
+                <span class="text-on-surface-variant text-[10px] uppercase tracking-widest">Again in 1m</span>
+              </button>
+              <button onclick="rateCard('good')" class="group flex flex-col items-center justify-center p-4 md:p-6 bg-surface-container-highest rounded-xl border-2 border-primary/20 hover:border-primary transition-all active:scale-95 shadow-lg">
+                <span class="text-primary font-headline font-black text-lg mb-1 tracking-tighter">Good</span>
+                <span class="text-on-surface-variant text-[10px] uppercase tracking-widest">Next in 1d</span>
+              </button>
+              <button onclick="rateCard('easy')" class="group flex flex-col items-center justify-center p-4 md:p-6 bg-surface-container-low rounded-xl border border-transparent hover:border-tertiary/30 transition-all active:scale-95">
+                <span class="text-tertiary font-headline font-black text-lg mb-1 tracking-tighter">Easy</span>
+                <span class="text-on-surface-variant text-[10px] uppercase tracking-widest">Next in 4d</span>
+              </button>
+            </div>
+
+            <!-- Session Complete -->
+            <div id="session-complete" class="hidden mt-8 bg-gradient-to-br from-primary-container to-surface-container-lowest p-10 rounded-xl border border-primary/10 text-center">
+              <span class="material-symbols-outlined text-primary text-6xl mb-4 block" style="font-variation-settings:'FILL'1">celebration</span>
+              <h3 class="text-2xl font-black text-on-surface mb-2">Session Complete!</h3>
+              <p id="session-summary" class="text-on-surface-variant mb-6">Great work on completing this deck.</p>
+              <button onclick="backToDecks()" class="px-8 py-3 bg-primary text-on-primary rounded-lg font-bold text-sm active:scale-95 transition-transform">Back to Decks</button>
+            </div>
+          </div>
+
+          <!-- Sidebar -->
+          <div class="col-span-12 lg:col-span-4 space-y-6">
+            <div class="bg-surface-container-high p-6 rounded-xl shadow-xl">
+              <h4 class="text-on-surface font-bold text-sm uppercase tracking-widest mb-4 flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary text-lg">insights</span> Session Stats
+              </h4>
+              <div class="space-y-4">
+                <div class="flex justify-between items-center">
+                  <span class="text-on-surface-variant text-sm">Retention Rate</span>
+                  <span id="retention-rate" class="text-primary font-bold">0%</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-on-surface-variant text-sm">Cards Reviewed</span>
+                  <span id="cards-reviewed" class="text-on-surface font-bold">0</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-on-surface-variant text-sm">Daily Streak</span>
+                  <span class="text-tertiary font-bold flex items-center gap-1">
+                    <span class="material-symbols-outlined text-sm" style="font-variation-settings:'FILL'1">bolt</span>
+                    <span id="card-streak">0</span> Days
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Add Card -->
+            <div class="bg-surface-container-highest p-6 rounded-xl shadow-xl">
+              <h4 class="text-primary font-bold text-xs uppercase tracking-widest mb-4 flex items-center gap-2">
+                <span class="material-symbols-outlined text-sm">add</span> Add Card to Deck
+              </h4>
+              <div class="space-y-3">
+                <textarea id="new-card-front" rows="2" placeholder="Question (front)"
+                  class="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-lg py-2 px-3 text-on-surface text-sm focus:outline-none focus:border-primary/50 resize-none"></textarea>
+                <textarea id="new-card-back" rows="2" placeholder="Answer (back)"
+                  class="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-lg py-2 px-3 text-on-surface text-sm focus:outline-none focus:border-primary/50 resize-none"></textarea>
+                <button id="add-card-btn" class="w-full py-2 bg-primary/20 text-primary rounded-lg font-bold text-xs uppercase tracking-widest hover:bg-primary/30 transition-colors active:scale-95">Add Card</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Delete Deck Modal -->
+  <div id="delete-modal" class="modal-overlay">
+    <div class="bg-surface-container-high p-8 rounded-xl w-full max-w-sm shadow-2xl text-center">
+      <span class="material-symbols-outlined text-error text-4xl mb-4 block">warning</span>
+      <h3 class="text-xl font-bold mb-2">Delete Deck?</h3>
+      <p class="text-on-surface-variant text-sm mb-6">This action cannot be undone. All cards in this deck will be lost.</p>
+      <div class="flex gap-3">
+        <button id="delete-cancel" class="flex-1 py-3 bg-surface-container-highest text-on-surface-variant rounded-lg font-bold text-sm">Cancel</button>
+        <button id="delete-confirm" class="flex-1 py-3 bg-error-container text-error rounded-lg font-bold text-sm active:scale-95 transition-transform">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/store.js"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/gamification.js"></script>
+  <script src="js/flashcards.js"></script>
+  <script>
+    let currentStudyDeckId = null;
+    let deleteDeckId = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      Nav.init('side-session');
+      Flashcards.seedDemoData();
+      renderDecks();
+
+      // Create deck
+      document.getElementById('create-deck-btn').addEventListener('click', () => {
+        const name = document.getElementById('new-deck-name').value.trim();
+        const subject = document.getElementById('new-deck-subject').value.trim();
+        if (!name) { Nav.showToast('Please enter a deck name', 'warning'); return; }
+        Flashcards.createDeck(name, subject);
+        document.getElementById('new-deck-name').value = '';
+        document.getElementById('new-deck-subject').value = '';
+        renderDecks();
+        Nav.showToast('Deck created!', 'success');
+      });
+
+      // Back to decks
+      document.getElementById('back-to-decks').addEventListener('click', backToDecks);
+
+      // Add card during study
+      document.getElementById('add-card-btn').addEventListener('click', () => {
+        if (!currentStudyDeckId) return;
+        const front = document.getElementById('new-card-front').value.trim();
+        const back = document.getElementById('new-card-back').value.trim();
+        if (!front || !back) { Nav.showToast('Fill in both sides of the card', 'warning'); return; }
+        Flashcards.addCard(currentStudyDeckId, front, back);
+        document.getElementById('new-card-front').value = '';
+        document.getElementById('new-card-back').value = '';
+        Nav.showToast('Card added!', 'success');
+      });
+
+      // Delete modal
+      const delModal = document.getElementById('delete-modal');
+      document.getElementById('delete-cancel').addEventListener('click', () => delModal.classList.remove('active'));
+      delModal.addEventListener('click', (e) => { if (e.target === delModal) delModal.classList.remove('active'); });
+      document.getElementById('delete-confirm').addEventListener('click', () => {
+        if (deleteDeckId) {
+          Store.deleteDeck(deleteDeckId);
+          deleteDeckId = null;
+          delModal.classList.remove('active');
+          renderDecks();
+          Nav.showToast('Deck deleted', 'info');
+        }
+      });
+    });
+
+    function renderDecks() {
+      const decks = Store.getDecks();
+      const grid = document.getElementById('deck-grid');
+      const noDecks = document.getElementById('no-decks');
+
+      if (decks.length === 0) {
+        grid.innerHTML = '';
+        noDecks.classList.remove('hidden');
+        return;
+      }
+      noDecks.classList.add('hidden');
+
+      const colors = ['from-primary-container', 'from-secondary-container', 'from-tertiary-container'];
+      grid.innerHTML = decks.map((deck, i) => {
+        const retention = Flashcards.getRetentionRate(deck.id);
+        const now = new Date();
+        const dueCount = deck.cards.filter(c => new Date(c.nextReview) <= now).length;
+        return `
+        <div class="bg-gradient-to-br ${colors[i % colors.length]} to-surface-container-low p-6 rounded-xl border border-primary/10 shadow-xl hover:shadow-2xl transition-all group">
+          <div class="flex items-start justify-between mb-4">
+            <div class="p-3 bg-surface-container-highest/50 rounded-lg">
+              <span class="material-symbols-outlined text-primary text-2xl">style</span>
+            </div>
+            <button onclick="confirmDeleteDeck('${deck.id}')" class="material-symbols-outlined text-on-surface-variant text-sm opacity-0 group-hover:opacity-100 transition-opacity hover:text-error">delete</button>
+          </div>
+          <h3 class="font-bold text-lg text-on-surface mb-1">${deck.name}</h3>
+          <p class="text-xs text-on-surface-variant mb-4">${deck.subject} · ${deck.cards.length} cards</p>
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-2">
+              <div class="w-2 h-2 rounded-full ${dueCount > 0 ? 'bg-tertiary animate-pulse' : 'bg-on-surface-variant/30'}"></div>
+              <span class="text-[10px] font-bold uppercase tracking-widest ${dueCount > 0 ? 'text-tertiary' : 'text-on-surface-variant'}">${dueCount} due</span>
+            </div>
+            <span class="text-[10px] font-bold text-primary">${retention}% retention</span>
+          </div>
+          <button onclick="startStudySession('${deck.id}')" class="w-full py-3 bg-primary/20 text-primary rounded-lg font-bold text-xs uppercase tracking-widest hover:bg-primary/30 transition-colors active:scale-95 ${deck.cards.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}">
+            ${deck.cards.length === 0 ? 'Add Cards First' : 'Study Now'}
+          </button>
+        </div>`;
+      }).join('');
+    }
+
+    function startStudySession(deckId) {
+      const deck = Flashcards.getDeck(deckId);
+      if (!deck || deck.cards.length === 0) {
+        Nav.showToast('Add cards to this deck first!', 'warning');
+        return;
+      }
+
+      currentStudyDeckId = deckId;
+      Flashcards.startSession(deckId);
+
+      document.getElementById('deck-view').classList.add('hidden');
+      document.getElementById('study-view').classList.remove('hidden');
+      document.getElementById('study-deck-name').textContent = deck.name;
+      document.getElementById('card-streak').textContent = Store.getStreak().count;
+
+      showCurrentCard();
+    }
+
+    function showCurrentCard() {
+      const card = Flashcards.getCurrentCard();
+      const progress = Flashcards.getSessionProgress();
+
+      document.getElementById('study-progress-text').textContent = `${progress.current} / ${progress.total}`;
+      document.getElementById('study-progress-bar').style.width = progress.percent + '%';
+
+      if (!card) {
+        // Session complete
+        const result = Flashcards.finishSession();
+        document.getElementById('flashcard-container').classList.add('hidden');
+        document.getElementById('rating-controls').classList.add('hidden');
+        document.getElementById('session-complete').classList.remove('hidden');
+        document.getElementById('session-summary').textContent =
+          `You reviewed ${result.total} cards. Good: ${result.correct + result.easy}, Hard: ${result.hard}. +${result.total * 5} XP earned!`;
+        return;
+      }
+
+      document.getElementById('card-text').textContent = card.front;
+      document.getElementById('flip-hint').classList.remove('hidden');
+      document.getElementById('rating-controls').classList.add('hidden');
+      document.getElementById('flashcard-container').classList.remove('hidden');
+      document.getElementById('session-complete').classList.add('hidden');
+
+      // Reset card visual
+      const cardFront = document.getElementById('card-front');
+      cardFront.classList.remove('border-tertiary/40');
+      cardFront.classList.add('border-primary/40');
+
+      updateStudyStats();
+    }
+
+    function handleFlip() {
+      const isFlipped = Flashcards.flipCard();
+      const card = Flashcards.getCurrentCard();
+      if (!card) return;
+
+      const cardText = document.getElementById('card-text');
+      const flipHint = document.getElementById('flip-hint');
+      const cardFront = document.getElementById('card-front');
+      const ratingControls = document.getElementById('rating-controls');
+
+      if (isFlipped) {
+        cardText.textContent = card.back;
+        flipHint.classList.add('hidden');
+        ratingControls.classList.remove('hidden');
+        cardFront.classList.add('border-tertiary/40');
+        cardFront.classList.remove('border-primary/40');
+        // Change icon
+        cardFront.querySelector('.material-symbols-outlined').textContent = 'lightbulb';
+      } else {
+        cardText.textContent = card.front;
+        flipHint.classList.remove('hidden');
+        ratingControls.classList.add('hidden');
+        cardFront.classList.remove('border-tertiary/40');
+        cardFront.classList.add('border-primary/40');
+        cardFront.querySelector('.material-symbols-outlined').textContent = 'help';
+      }
+    }
+
+    function rateCard(rating) {
+      Flashcards.rateCard(rating);
+      showCurrentCard();
+    }
+
+    function updateStudyStats() {
+      if (!currentStudyDeckId) return;
+      const retention = Flashcards.getRetentionRate(currentStudyDeckId);
+      const progress = Flashcards.getSessionProgress();
+      document.getElementById('retention-rate').textContent = retention + '%';
+      document.getElementById('cards-reviewed').textContent = progress.current;
+    }
+
+    function backToDecks() {
+      if (currentStudyDeckId && Flashcards.getCurrentCard()) {
+        Flashcards.finishSession();
+      }
+      currentStudyDeckId = null;
+      document.getElementById('deck-view').classList.remove('hidden');
+      document.getElementById('study-view').classList.add('hidden');
+      renderDecks();
+    }
+
+    function confirmDeleteDeck(deckId) {
+      deleteDeckId = deckId;
+      document.getElementById('delete-modal').classList.add('active');
+    }
+  </script>
+</body>
+</html>

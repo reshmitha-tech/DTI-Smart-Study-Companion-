@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Scholarly | Focus Timer</title>
+  <meta name="description" content="Pomodoro-style focus timer with distraction detection. Track your study sessions in laptop or manual mode."/>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script>
+    tailwind.config={darkMode:"class",theme:{extend:{colors:{"primary-fixed":"#d4e3ff","surface-container":"#1a194a","secondary-fixed":"#e2dfff","inverse-on-surface":"#2b2b5b","surface":"#0d0b3d","error":"#ffb4ab","surface-container-lowest":"#070539","primary-container":"#002242","on-secondary-fixed-variant":"#3b3b94","inverse-primary":"#0060ac","tertiary":"#3cd7ff","outline":"#918f9d","on-surface":"#e2dfff","on-background":"#e2dfff","surface-bright":"#343465","on-primary-fixed-variant":"#004883","on-error-container":"#ffdad6","tertiary-container":"#00252f","secondary":"#c1c1ff","primary-fixed-dim":"#a4c9ff","on-primary-container":"#448bdc","primary":"#a4c9ff","on-tertiary-fixed":"#001f27","on-error":"#690005","secondary-container":"#3b3b94","error-container":"#93000a","on-tertiary":"#003642","secondary-fixed-dim":"#c1c1ff","surface-variant":"#2f2f60","surface-dim":"#0d0b3d","on-tertiary-container":"#0095b4","outline-variant":"#464651","on-secondary-fixed":"#0b016a","on-tertiary-fixed-variant":"#004e5f","on-secondary":"#24227d","on-primary":"#00315d","surface-tint":"#a4c9ff","on-surface-variant":"#c7c5d3","on-primary-fixed":"#001c39","tertiary-fixed-dim":"#3cd7ff","surface-container-high":"#242455","surface-container-low":"#161545","inverse-surface":"#e2dfff","background":"#0d0b3d","surface-container-highest":"#2f2f60","on-secondary-container":"#adadff","tertiary-fixed":"#b4ebff"},borderRadius:{DEFAULT:"0.25rem",lg:"0.5rem",xl:"0.75rem",full:"9999px"},fontFamily:{headline:["Manrope"],body:["Manrope"],label:["Manrope"]}}}};
+  </script>
+  <link rel="stylesheet" href="css/shared.css"/>
+</head>
+<body class="bg-surface text-on-surface min-h-screen overflow-x-hidden">
+
+  <div id="nav-mount"></div>
+  <div class="flex min-h-[calc(100vh-5rem)]">
+    <div id="sidebar-mount"></div>
+
+    <main class="md:ml-72 flex-1 pt-8 md:pt-12 pb-24 px-6 md:px-12 flex flex-col items-center justify-start min-h-[calc(100vh-80px)]">
+      <div class="w-full max-w-4xl space-y-10 flex flex-col items-center">
+
+        <!-- Distraction Detector -->
+        <div id="distraction-status" class="flex items-center gap-6 bg-surface-container-low px-8 py-3 rounded-full shadow-lg animate-fade-in">
+          <div class="w-2 h-2 rounded-full bg-on-surface-variant"></div>
+          <span class="text-xs font-bold tracking-widest uppercase text-on-surface-variant">Distraction Detector</span>
+          <div class="w-px h-4 bg-outline-variant/30"></div>
+          <span class="text-xs font-bold tracking-widest uppercase text-on-surface-variant">Status: Inactive</span>
+        </div>
+
+        <!-- Timer Settings -->
+        <div class="w-full max-w-md bg-surface-container-low rounded-xl p-6 animate-fade-in animate-fade-in-delay-1">
+          <div class="grid grid-cols-2 gap-4 mb-4">
+            <div>
+              <label class="block text-[10px] uppercase tracking-widest text-on-surface-variant mb-1 font-bold">Study (min)</label>
+              <input id="study-input" type="number" min="1" max="120" value="25"
+                class="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-lg py-2 px-3 text-on-surface text-center text-lg font-bold focus:outline-none focus:border-primary/50"/>
+            </div>
+            <div>
+              <label class="block text-[10px] uppercase tracking-widest text-on-surface-variant mb-1 font-bold">Break (min)</label>
+              <input id="break-input" type="number" min="1" max="30" value="5"
+                class="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-lg py-2 px-3 text-on-surface text-center text-lg font-bold focus:outline-none focus:border-primary/50"/>
+            </div>
+          </div>
+          <div>
+            <label class="block text-[10px] uppercase tracking-widest text-on-surface-variant mb-1 font-bold">Subject</label>
+            <input id="subject-input" type="text" placeholder="e.g. Mathematics"
+              class="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-lg py-2 px-3 text-on-surface focus:outline-none focus:border-primary/50"/>
+          </div>
+        </div>
+
+        <!-- Giant Timer Display -->
+        <div class="relative flex flex-col items-center group animate-fade-in animate-fade-in-delay-2">
+          <div class="absolute -inset-24 bg-primary/5 rounded-full blur-[100px] opacity-50 group-hover:opacity-70 transition-opacity"></div>
+          <div class="relative flex flex-col items-center">
+            <h1 id="timer-display" class="text-[120px] md:text-[200px] font-black tracking-tighter text-glow text-primary leading-none select-none transition-all">
+              25:00
+            </h1>
+            <p id="phase-label" class="text-on-surface-variant tracking-[0.4em] font-light uppercase mt-[-10px] md:mt-[-20px] ml-4 transition-all">Ready</p>
+          </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="flex flex-col items-center gap-8 w-full max-w-md animate-fade-in animate-fade-in-delay-3">
+          <div class="flex items-center gap-4 w-full">
+            <button id="start-btn" class="flex-1 py-5 premium-gradient rounded-lg text-on-primary font-black uppercase tracking-widest shadow-[0_10px_30px_-10px_rgba(164,201,255,0.4)] hover:scale-[1.02] active:scale-95 transition-all">
+              Start Session
+            </button>
+            <button id="reset-btn" class="flex-1 py-5 bg-surface-container-high rounded-lg text-primary font-bold uppercase tracking-widest hover:bg-surface-variant transition-colors active:scale-95">
+              Reset
+            </button>
+          </div>
+
+          <!-- Mode Toggle -->
+          <div class="bg-surface-container-low p-2 rounded-xl flex items-center gap-1 w-full max-w-sm">
+            <button id="mode-laptop" class="flex-1 py-3 bg-surface-container-highest rounded-lg text-primary font-bold text-xs uppercase tracking-widest shadow-lg transition-all">
+              💻 Laptop Mode
+            </button>
+            <button id="mode-manual" class="flex-1 py-3 text-on-surface-variant font-bold text-xs uppercase tracking-widest hover:text-on-surface transition-colors">
+              📝 Manual Mode
+            </button>
+          </div>
+
+          <!-- Finish Session -->
+          <button id="finish-btn" class="w-full py-4 bg-error-container text-error rounded-lg font-bold text-sm uppercase tracking-widest active:scale-95 transition-all hidden">
+            ✓ Finish & Save Session
+          </button>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full mt-4 animate-fade-in animate-fade-in-delay-4">
+          <div class="bg-surface-container-high p-8 rounded-xl space-y-4 shadow-xl">
+            <span class="material-symbols-outlined text-primary text-3xl">psychology</span>
+            <div>
+              <h4 class="text-on-surface font-bold uppercase text-[10px] tracking-widest mb-1">Concentration</h4>
+              <div id="concentration-val" class="text-2xl font-black text-on-surface">100%</div>
+            </div>
+            <div class="w-full bg-surface-container rounded-full h-1">
+              <div id="concentration-bar" class="bg-primary h-full rounded-full transition-all duration-500" style="width:100%"></div>
+            </div>
+          </div>
+          <div class="bg-surface-container-high p-8 rounded-xl space-y-4 shadow-xl">
+            <span class="material-symbols-outlined text-tertiary text-3xl">task_alt</span>
+            <div>
+              <h4 class="text-on-surface font-bold uppercase text-[10px] tracking-widest mb-1">Cycles Completed</h4>
+              <div id="cycles-val" class="text-2xl font-black text-on-surface">0</div>
+            </div>
+            <p class="text-on-surface-variant text-xs">Pomodoro cycles this session</p>
+          </div>
+          <div class="bg-surface-container-high p-8 rounded-xl space-y-4 shadow-xl">
+            <span class="material-symbols-outlined text-secondary text-3xl">coffee</span>
+            <div>
+              <h4 class="text-on-surface font-bold uppercase text-[10px] tracking-widest mb-1">Study Time</h4>
+              <div id="study-time-val" class="text-2xl font-black text-on-surface">0m</div>
+            </div>
+            <p class="text-on-surface-variant text-xs">Total focused minutes today</p>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/store.js"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/gamification.js"></script>
+  <script src="js/timer.js"></script>
+  <script src="js/focus-detect.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      Nav.init('side-timer');
+
+      let mode = 'laptop'; // laptop | manual
+      let cycles = 0;
+      const timerDisplay = document.getElementById('timer-display');
+      const phaseLabel = document.getElementById('phase-label');
+      const startBtn = document.getElementById('start-btn');
+      const resetBtn = document.getElementById('reset-btn');
+      const finishBtn = document.getElementById('finish-btn');
+      const studyInput = document.getElementById('study-input');
+      const breakInput = document.getElementById('break-input');
+
+      // Configure timer
+      Timer.configure({
+        studyMinutes: parseInt(studyInput.value) || 25,
+        breakMinutes: parseInt(breakInput.value) || 5,
+        onTick: (remaining, total) => {
+          timerDisplay.textContent = Timer.formatTime(remaining);
+          // Update title
+          document.title = `${Timer.formatTime(remaining)} — Scholarly Focus`;
+        },
+        onStateChange: (state) => {
+          phaseLabel.textContent = Timer.getPhaseLabel();
+          updateUI(state);
+        },
+        onComplete: (phase) => {
+          if (phase === 'study') {
+            cycles++;
+            document.getElementById('cycles-val').textContent = cycles;
+            Nav.showToast('🎉 Study phase complete! Take a break.', 'success');
+          } else {
+            Nav.showToast('Break over — let\'s focus again!', 'info');
+          }
+        }
+      });
+
+      // Init display
+      timerDisplay.textContent = Timer.formatTime(parseInt(studyInput.value) * 60 || 25 * 60);
+
+      // Update timer config when inputs change
+      studyInput.addEventListener('change', () => {
+        Timer.configure({ studyMinutes: parseInt(studyInput.value) || 25 });
+        if (Timer.getState() === 'idle') {
+          timerDisplay.textContent = Timer.formatTime((parseInt(studyInput.value) || 25) * 60);
+        }
+      });
+      breakInput.addEventListener('change', () => {
+        Timer.configure({ breakMinutes: parseInt(breakInput.value) || 5 });
+      });
+
+      // Focus detection
+      FocusDetect.init({
+        statusElement: document.getElementById('distraction-status'),
+        onDistraction: (count) => {
+          Nav.showToast(`⚠️ Distraction detected! (${count} tab switches)`, 'warning');
+          updateConcentration();
+        },
+        onReturn: () => updateConcentration()
+      });
+
+      // Start
+      startBtn.addEventListener('click', () => {
+        const state = Timer.getState();
+        if (state === 'idle') {
+          Timer.configure({
+            studyMinutes: parseInt(studyInput.value) || 25,
+            breakMinutes: parseInt(breakInput.value) || 5
+          });
+          Timer.start();
+          if (mode === 'laptop') FocusDetect.start();
+          finishBtn.classList.remove('hidden');
+        } else if (state === 'paused') {
+          Timer.start();
+        } else if (state === 'studying' || state === 'break') {
+          Timer.pause();
+        }
+      });
+
+      // Reset
+      resetBtn.addEventListener('click', () => {
+        Timer.reset();
+        FocusDetect.stop();
+        cycles = 0;
+        document.getElementById('cycles-val').textContent = '0';
+        finishBtn.classList.add('hidden');
+        document.title = 'Scholarly | Focus Timer';
+        timerDisplay.textContent = Timer.formatTime((parseInt(studyInput.value) || 25) * 60);
+      });
+
+      // Finish session
+      finishBtn.addEventListener('click', () => {
+        const subject = document.getElementById('subject-input').value.trim() || 'General';
+        const result = Timer.finishSession(subject, mode);
+        FocusDetect.stop();
+        cycles = 0;
+        document.getElementById('cycles-val').textContent = '0';
+        finishBtn.classList.add('hidden');
+        document.title = 'Scholarly | Focus Timer';
+        Nav.showToast(`Session saved! +${result.points} XP for ${result.minutes}m of study`, 'success');
+        updateStudyTime();
+        timerDisplay.textContent = Timer.formatTime((parseInt(studyInput.value) || 25) * 60);
+      });
+
+      // Mode toggle
+      const laptopBtn = document.getElementById('mode-laptop');
+      const manualBtn = document.getElementById('mode-manual');
+      laptopBtn.addEventListener('click', () => {
+        mode = 'laptop';
+        laptopBtn.className = 'flex-1 py-3 bg-surface-container-highest rounded-lg text-primary font-bold text-xs uppercase tracking-widest shadow-lg transition-all';
+        manualBtn.className = 'flex-1 py-3 text-on-surface-variant font-bold text-xs uppercase tracking-widest hover:text-on-surface transition-colors';
+      });
+      manualBtn.addEventListener('click', () => {
+        mode = 'manual';
+        manualBtn.className = 'flex-1 py-3 bg-surface-container-highest rounded-lg text-primary font-bold text-xs uppercase tracking-widest shadow-lg transition-all';
+        laptopBtn.className = 'flex-1 py-3 text-on-surface-variant font-bold text-xs uppercase tracking-widest hover:text-on-surface transition-colors';
+        FocusDetect.stop();
+      });
+
+      function updateUI(state) {
+        if (state === 'studying') {
+          startBtn.textContent = 'Pause';
+          startBtn.className = 'flex-1 py-5 bg-surface-container-highest rounded-lg text-primary font-bold uppercase tracking-widest hover:bg-surface-variant active:scale-95 transition-all';
+          timerDisplay.classList.remove('text-tertiary');
+          timerDisplay.classList.add('text-primary');
+        } else if (state === 'break') {
+          startBtn.textContent = 'Pause';
+          timerDisplay.classList.add('text-tertiary');
+          timerDisplay.classList.remove('text-primary');
+        } else if (state === 'paused') {
+          startBtn.textContent = 'Resume';
+          startBtn.className = 'flex-1 py-5 premium-gradient rounded-lg text-on-primary font-black uppercase tracking-widest shadow-[0_10px_30px_-10px_rgba(164,201,255,0.4)] hover:scale-[1.02] active:scale-95 transition-all';
+        } else {
+          startBtn.textContent = 'Start Session';
+          startBtn.className = 'flex-1 py-5 premium-gradient rounded-lg text-on-primary font-black uppercase tracking-widest shadow-[0_10px_30px_-10px_rgba(164,201,255,0.4)] hover:scale-[1.02] active:scale-95 transition-all';
+          timerDisplay.classList.remove('text-tertiary');
+          timerDisplay.classList.add('text-primary');
+        }
+      }
+
+      function updateConcentration() {
+        const stats = FocusDetect.getStats();
+        document.getElementById('concentration-val').textContent = stats.concentration + '%';
+        document.getElementById('concentration-bar').style.width = stats.concentration + '%';
+      }
+
+      function updateStudyTime() {
+        const today = Store.getTodayStats();
+        document.getElementById('study-time-val').textContent = today.totalMinutes + 'm';
+      }
+      updateStudyTime();
+
+      // Periodic concentration update
+      setInterval(() => {
+        if (mode === 'laptop' && Timer.getState() !== 'idle') {
+          updateConcentration();
+        }
+      }, 5000);
+    });
+  </script>
+</body>
+</html>

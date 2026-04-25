@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Smart Study Companion</title>
+  <meta name="description" content="AI-powered study companion with timetable generation, Pomodoro timer, chatbot, analytics, and gamification."/>
+  <link rel="stylesheet" href="/static/style.css"/>
+</head>
+<body>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <div class="app-container">
+
+    <!-- ════════════ HEADER ════════════ -->
+    <header class="app-header">
+      <a href="/" class="logo">
+        <div class="logo-icon">🎓</div>
+        <span class="logo-text">Scholarly</span>
+      </a>
+      <div class="header-stats">
+        <div class="stat-badge">
+          <span class="icon">⚡</span>
+          <span class="value" id="header-points">0</span>
+          <span>XP</span>
+        </div>
+        <div class="stat-badge streak-badge">
+          <span class="icon">🔥</span>
+          <span class="value" id="header-streak">0d</span>
+          <span>Streak</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- ════════════ DASHBOARD WIDGETS ════════════ -->
+    <div class="dashboard-widgets">
+
+      <!-- 🔥 Streak Widget -->
+      <div class="widget widget-streak" id="streak-widget">
+        <div class="widget-icon">🔥</div>
+        <div class="widget-content">
+          <div class="widget-value" id="dash-streak">0</div>
+          <div class="widget-label">Day Streak</div>
+        </div>
+      </div>
+
+      <!-- 📊 Consistency Score Widget -->
+      <div class="widget widget-consistency">
+        <div class="widget-icon">📊</div>
+        <div class="widget-content">
+          <div class="widget-value" id="dash-consistency">0%</div>
+          <div class="widget-label">Consistency (7d)</div>
+        </div>
+        <div class="consistency-bar">
+          <div class="consistency-fill" id="consistency-fill" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <!-- 🎯 Daily Goal Tracker Widget -->
+      <div class="widget widget-goal">
+        <div class="widget-icon">🎯</div>
+        <div class="widget-content">
+          <div class="widget-value" id="dash-goal-progress">0 / 2h</div>
+          <div class="widget-label">Daily Goal</div>
+        </div>
+        <div class="goal-bar">
+          <div class="goal-fill" id="goal-fill" style="width: 0%"></div>
+        </div>
+        <button class="goal-set-btn" onclick="openGoalModal()" title="Set daily goal">⚙️</button>
+      </div>
+
+      <!-- ⚡ XP Widget -->
+      <div class="widget widget-xp">
+        <div class="widget-icon">⚡</div>
+        <div class="widget-content">
+          <div class="widget-value" id="dash-xp">0</div>
+          <div class="widget-label">Total XP</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Daily Goal Modal -->
+    <div id="goal-modal" class="goal-modal-overlay" style="display:none;">
+      <div class="goal-modal">
+        <h3>🎯 Set Daily Study Goal</h3>
+        <p style="color: var(--text-secondary); margin-bottom: 16px; font-size: 0.9rem;">
+          How many hours do you want to study each day?
+        </p>
+        <div class="form-group">
+          <label for="goal-hours-input">Daily Goal (hours)</label>
+          <input type="number" id="goal-hours-input" class="form-input" min="0.5" max="12" step="0.5" value="2"/>
+        </div>
+        <div style="display:flex; gap:12px; margin-top:16px;">
+          <button class="btn btn-secondary" onclick="closeGoalModal()" style="flex:1;">Cancel</button>
+          <button class="btn btn-primary" onclick="saveDailyGoal()" style="flex:1;">Save Goal</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════ NAV TABS ════════════ -->
+    <div class="nav-tabs">
+      <button class="nav-tab active" data-tab="timetable" onclick="switchTab('timetable')">📅 Timetable</button>
+      <button class="nav-tab" data-tab="focus" onclick="switchTab('focus')">⏱ Focus Mode</button>
+      <button class="nav-tab" data-tab="chatbot" onclick="switchTab('chatbot')">🤖 Chatbot</button>
+      <button class="nav-tab" data-tab="progress" onclick="switchTab('progress')">📊 Progress</button>
+      <button class="nav-tab" data-tab="rewards" onclick="switchTab('rewards')">🏆 Rewards</button>
+    </div>
+
+
+    <!-- ══════════════════════════════════════════════════════ -->
+    <!--  SECTION 1: TIMETABLE GENERATOR                      -->
+    <!-- ══════════════════════════════════════════════════════ -->
+    <div id="section-timetable" class="section active">
+
+      <div class="card">
+        <div class="card-title"><span class="emoji">📅</span> Smart Timetable Generator</div>
+        <p style="color: var(--text-secondary); margin-bottom: 24px;">
+          Enter your subjects, set priority levels, and our algorithm will allocate more time to harder subjects.
+        </p>
+
+        <div class="form-group">
+          <label for="input-subjects">Subjects (comma-separated)</label>
+          <input type="text" id="input-subjects" class="form-input"
+                 placeholder="e.g. Mathematics, Physics, Chemistry, Biology"/>
+        </div>
+
+        <!-- Subject Priority Selection (dynamically populated) -->
+        <div id="priority-container" class="priority-container" style="display:none;">
+          <label class="priority-label">📌 Set Subject Priority</label>
+          <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 12px;">
+            Hard subjects get more study time in your timetable.
+          </p>
+          <div id="priority-list" class="priority-list"></div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="input-hours">Study Hours Per Day</label>
+            <input type="number" id="input-hours" class="form-input"
+                   min="1" max="12" value="4" placeholder="4"/>
+          </div>
+          <div class="form-group">
+            <label for="input-exam-date">Exam Date</label>
+            <input type="date" id="input-exam-date" class="form-input"/>
+          </div>
+        </div>
+
+        <button class="btn btn-primary btn-full" onclick="generatePlan()">
+          ✨ Generate Study Plan
+        </button>
+      </div>
+
+      <!-- Timetable Output -->
+      <div class="card" id="timetable-result">
+        <p style="text-align: center; color: var(--text-muted); padding: 40px 0;">
+          Your generated timetable will appear here. Fill in the form above and click "Generate Study Plan"!
+        </p>
+      </div>
+    </div>
+
+
+    <!-- ══════════════════════════════════════════════════════ -->
+    <!--  SECTION 2: FOCUS TIMER                               -->
+    <!-- ══════════════════════════════════════════════════════ -->
+    <div id="section-focus" class="section">
+
+      <!-- Distraction Detector Bar -->
+      <div id="distraction-bar" class="distraction-bar">
+        <div class="dot"></div>
+        <span id="distraction-text">⚪ Distraction Detector: Inactive</span>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="emoji">⏱</span> Pomodoro Focus Timer</div>
+
+        <!-- Timer Settings -->
+        <div class="form-row" style="margin-bottom: 24px;">
+          <div class="form-group">
+            <label for="timer-study-min">Study (minutes)</label>
+            <input type="number" id="timer-study-min" class="form-input" min="1" max="120" value="25"/>
+          </div>
+          <div class="form-group">
+            <label for="timer-break-min">Break (minutes)</label>
+            <input type="number" id="timer-break-min" class="form-input" min="1" max="30" value="5"/>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="timer-subject">Subject</label>
+          <select id="timer-subject" class="form-input">
+            <option value="General">General Study</option>
+            <option value="Mathematics">Mathematics</option>
+            <option value="Physics">Physics</option>
+            <option value="Chemistry">Chemistry</option>
+            <option value="Biology">Biology</option>
+          </select>
+        </div>
+
+        <!-- Timer Display -->
+        <div class="timer-container">
+          <div id="timer-ring" class="timer-ring">
+            <div id="timer-display" class="timer-display">25:00</div>
+            <div id="timer-phase" class="timer-phase">Ready</div>
+            <div id="timer-cycle" class="timer-cycle">Cycle 0</div>
+          </div>
+
+          <div class="timer-controls">
+            <button id="btn-start" class="btn btn-primary" onclick="startTimer()">▶ Start</button>
+            <button id="btn-pause" class="btn btn-secondary" onclick="pauseTimer()" style="display:none;">⏸ Pause</button>
+            <button class="btn btn-secondary" onclick="resetTimer()">⟲ Reset</button>
+            <button id="btn-finish" class="btn btn-success" onclick="finishSession()" style="display:none;">✓ Finish & Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ══════════════════════════════════════════════════════ -->
+    <!--  SECTION 3: CHATBOT                                   -->
+    <!-- ══════════════════════════════════════════════════════ -->
+    <div id="section-chatbot" class="section">
+      <div class="card">
+        <div class="card-title"><span class="emoji">🤖</span> Study Assistant</div>
+
+        <div class="chat-container">
+          <div id="chat-messages" class="chat-messages">
+            <!-- Messages injected by JS -->
+          </div>
+
+          <div class="quick-replies">
+            <button class="quick-reply" onclick="sendQuickReply('Give me study tips')">📚 Study Tips</button>
+            <button class="quick-reply" onclick="sendQuickReply('How do I focus better?')">🎯 Focus Help</button>
+            <button class="quick-reply" onclick="sendQuickReply('How should I prepare for exams?')">📝 Exam Prep</button>
+            <button class="quick-reply" onclick="sendQuickReply('I need motivation')">💪 Motivation</button>
+            <button class="quick-reply" onclick="sendQuickReply('Help me manage my time')">⏰ Time Tips</button>
+          </div>
+
+          <div class="chat-input-row">
+            <input type="text" id="chat-input" class="form-input" placeholder="Ask me anything about studying..."/>
+            <button class="btn btn-primary" onclick="sendChat()">Send</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ══════════════════════════════════════════════════════ -->
+    <!--  SECTION 4: PROGRESS / ANALYTICS                      -->
+    <!-- ══════════════════════════════════════════════════════ -->
+    <div id="section-progress" class="section">
+
+      <!-- Stats Grid -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">📅</div>
+          <div class="stat-value" id="stat-today-mins">0m</div>
+          <div class="stat-label">Today</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📊</div>
+          <div class="stat-value" id="stat-total-sessions">0</div>
+          <div class="stat-label">Total Sessions</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">⏱</div>
+          <div class="stat-value" id="stat-total-mins">0m</div>
+          <div class="stat-label">Total Study Time</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🎯</div>
+          <div class="stat-value" id="stat-avg-focus">0m</div>
+          <div class="stat-label">Avg Session</div>
+        </div>
+      </div>
+
+      <!-- Weekly Chart -->
+      <div class="card">
+        <div class="card-title"><span class="emoji">📈</span> Weekly Study Activity</div>
+        <div id="weekly-chart" class="bar-chart"></div>
+      </div>
+
+      <!-- Session History -->
+      <div class="card">
+        <div class="card-title"><span class="emoji">📋</span> Session History</div>
+        <div id="session-list" class="session-list"></div>
+      </div>
+    </div>
+
+
+    <!-- ══════════════════════════════════════════════════════ -->
+    <!--  SECTION 5: REWARDS / GAMIFICATION                    -->
+    <!-- ══════════════════════════════════════════════════════ -->
+    <div id="section-rewards" class="section">
+
+      <div class="rewards-grid">
+        <div class="stat-card">
+          <div class="stat-icon">⚡</div>
+          <div class="stat-value" id="game-points">0</div>
+          <div class="stat-label">Total XP</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🔥</div>
+          <div class="stat-value streak-fire" id="game-streak">0</div>
+          <div class="stat-label">Day Streak</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🎖</div>
+          <div class="stat-value" id="game-level">1</div>
+          <div class="stat-label">Level</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📚</div>
+          <div class="stat-value" id="game-sessions">0</div>
+          <div class="stat-label">Sessions</div>
+        </div>
+      </div>
+
+      <!-- Level Progress -->
+      <div class="card">
+        <div class="card-title"><span class="emoji">📈</span> Level Progress</div>
+        <div style="background: var(--bg-input); border-radius: var(--radius-full); height: 12px; overflow: hidden; margin-bottom: 12px;">
+          <div id="level-progress" style="height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: var(--radius-full); transition: width 1s ease; width: 0%;"></div>
+        </div>
+        <p id="level-text" style="text-align: center; color: var(--text-secondary); font-size: 0.85rem; font-weight: 600;">Level 1 — 0/100 XP to next level</p>
+      </div>
+
+      <!-- Achievements -->
+      <div class="card">
+        <div class="card-title"><span class="emoji">🏅</span> Achievements</div>
+        <div id="achievements-list"></div>
+      </div>
+    </div>
+
+  </div><!-- /app-container -->
+
+  <script src="/static/script.js"></script>
+</body>
+</html>

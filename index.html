@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Scholarly - Smart Study Companion</title>
+  <meta name="description" content="Scholarly — Personalized study planning, focus tracking, flashcards, and analytics. Your smart study companion."/>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary-fixed":"#d4e3ff","surface-container":"#1a194a","secondary-fixed":"#e2dfff",
+            "inverse-on-surface":"#2b2b5b","surface":"#0d0b3d","error":"#ffb4ab",
+            "surface-container-lowest":"#070539","primary-container":"#002242",
+            "on-secondary-fixed-variant":"#3b3b94","inverse-primary":"#0060ac",
+            "tertiary":"#3cd7ff","outline":"#918f9d","on-surface":"#e2dfff",
+            "on-background":"#e2dfff","surface-bright":"#343465",
+            "on-primary-fixed-variant":"#004883","on-error-container":"#ffdad6",
+            "tertiary-container":"#00252f","secondary":"#c1c1ff",
+            "primary-fixed-dim":"#a4c9ff","on-primary-container":"#448bdc",
+            "primary":"#a4c9ff","on-tertiary-fixed":"#001f27","on-error":"#690005",
+            "secondary-container":"#3b3b94","error-container":"#93000a",
+            "on-tertiary":"#003642","secondary-fixed-dim":"#c1c1ff",
+            "surface-variant":"#2f2f60","surface-dim":"#0d0b3d",
+            "on-tertiary-container":"#0095b4","outline-variant":"#464651",
+            "on-secondary-fixed":"#0b016a","on-tertiary-fixed-variant":"#004e5f",
+            "on-secondary":"#24227d","on-primary":"#00315d","surface-tint":"#a4c9ff",
+            "on-surface-variant":"#c7c5d3","on-primary-fixed":"#001c39",
+            "tertiary-fixed-dim":"#3cd7ff","surface-container-high":"#242455",
+            "surface-container-low":"#161545","inverse-surface":"#e2dfff",
+            "background":"#0d0b3d","surface-container-highest":"#2f2f60",
+            "on-secondary-container":"#adadff","tertiary-fixed":"#b4ebff"
+          },
+          borderRadius: { DEFAULT:"0.25rem", lg:"0.5rem", xl:"0.75rem", full:"9999px" },
+          fontFamily: { headline:["Manrope"], body:["Manrope"], label:["Manrope"] }
+        }
+      }
+    };
+  </script>
+  <link rel="stylesheet" href="css/shared.css"/>
+</head>
+<body class="bg-surface text-on-surface overflow-x-hidden">
+
+  <!-- Navigation Mount Points -->
+  <div id="nav-mount"></div>
+  <div class="flex min-h-[calc(100vh-5rem)]">
+    <div id="sidebar-mount"></div>
+
+    <!-- Main Content -->
+    <main class="flex-1 md:ml-72 p-6 md:p-12 overflow-y-auto">
+
+      <!-- Hero Section: Daily Stats Bento -->
+      <div class="grid grid-cols-12 gap-6 mb-12 animate-fade-in">
+        <!-- Progress Card -->
+        <div class="col-span-12 lg:col-span-7 bg-surface-container-highest rounded-lg p-8 shadow-[0_40px_40px_-20px_rgba(7,5,57,0.4)] relative overflow-hidden group">
+          <div class="relative z-10">
+            <h1 class="text-3xl md:text-4xl font-extrabold tracking-tighter mb-2">Welcome back, Scholar.</h1>
+            <p id="hero-subtitle" class="text-on-surface-variant mb-8 max-w-md">Loading your progress...</p>
+            <div class="space-y-4">
+              <div class="flex justify-between items-end mb-1">
+                <span class="text-xs font-bold uppercase tracking-widest text-primary">Daily Goal Progress</span>
+                <span id="goal-percent" class="text-2xl font-black text-primary">0%</span>
+              </div>
+              <div class="h-3 w-full bg-surface-container-lowest rounded-full overflow-hidden">
+                <div id="goal-bar" class="h-full bg-gradient-to-r from-primary to-on-primary-container rounded-full transition-all duration-1000" style="width: 0%"></div>
+              </div>
+            </div>
+          </div>
+          <div class="absolute -right-20 -top-20 w-80 h-80 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-all"></div>
+        </div>
+
+        <!-- Metrics Bento -->
+        <div class="col-span-12 lg:col-span-5 grid grid-cols-2 gap-6">
+          <div class="bg-surface-container-high rounded-lg p-6 flex flex-col justify-between items-start animate-fade-in animate-fade-in-delay-1">
+            <div class="p-3 bg-secondary-container rounded-lg mb-4">
+              <span class="material-symbols-outlined text-on-secondary-container material-filled">local_fire_department</span>
+            </div>
+            <div>
+              <span class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1">Daily Streak</span>
+              <span id="streak-count" class="text-3xl font-black text-on-surface tracking-tighter">0 Days</span>
+            </div>
+          </div>
+          <div class="bg-surface-container-high rounded-lg p-6 flex flex-col justify-between items-start animate-fade-in animate-fade-in-delay-2">
+            <div class="p-3 bg-on-primary-fixed-variant rounded-lg mb-4">
+              <span class="material-symbols-outlined text-primary-fixed material-filled">psychology</span>
+            </div>
+            <div>
+              <span class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1">Cognitive Points</span>
+              <span id="points-count" class="text-3xl font-black text-on-surface tracking-tighter">0 pts</span>
+            </div>
+          </div>
+          <div class="col-span-2 bg-gradient-to-br from-primary-container to-surface-container-lowest rounded-lg p-6 flex items-center justify-between border border-primary/10 animate-fade-in animate-fade-in-delay-3">
+            <div class="flex items-center gap-4">
+              <div class="p-4 bg-primary rounded-full shadow-[0_0_20px_rgba(164,201,255,0.4)]">
+                <span class="material-symbols-outlined text-on-primary material-filled">bolt</span>
+              </div>
+              <div>
+                <h4 class="font-bold text-lg">Focus Mode</h4>
+                <p class="text-xs text-on-surface-variant">Boost performance by 25%</p>
+              </div>
+            </div>
+            <a href="focus.html" class="px-6 py-2 bg-primary text-on-primary rounded-lg font-bold text-sm hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-primary/20">
+              Activate
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Activity & Upcoming -->
+      <div class="grid grid-cols-12 gap-8">
+        <!-- Activity Column -->
+        <div class="col-span-12 lg:col-span-8">
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-bold tracking-tight">Recent Activity</h2>
+            <a href="analytics.html" class="text-sm font-bold text-primary hover:underline">View All History</a>
+          </div>
+          <div id="activity-list" class="space-y-4">
+            <!-- Populated by JS -->
+          </div>
+          <div id="no-activity" class="hidden bg-surface-container-low rounded-lg p-12 text-center">
+            <span class="material-symbols-outlined text-5xl text-on-surface-variant/30 mb-4 block">history</span>
+            <p class="text-on-surface-variant">No recent activity yet. Start a study session to see your progress!</p>
+            <a href="focus.html" class="inline-block mt-4 px-6 py-2 bg-primary text-on-primary rounded-lg font-bold text-sm hover:opacity-90 transition-all">Start Studying</a>
+          </div>
+        </div>
+
+        <!-- Upcoming Sidebar -->
+        <div class="col-span-12 lg:col-span-4 space-y-8">
+          <!-- Deadlines -->
+          <div>
+            <div class="flex items-center justify-between mb-6">
+              <h3 class="text-xl font-bold tracking-tight">Upcoming Deadlines</h3>
+              <button id="add-deadline-btn" class="material-symbols-outlined text-primary text-sm hover:scale-110 transition-transform">add_circle</button>
+            </div>
+            <div id="deadlines-list" class="bg-surface-container-highest rounded-lg divide-y divide-surface-variant/20">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <!-- Quick Links -->
+          <div class="grid grid-cols-2 gap-3">
+            <a href="timetable.html" class="bg-surface-container-high p-4 rounded-lg flex flex-col items-center gap-2 hover:bg-surface-container-highest transition-colors group">
+              <span class="material-symbols-outlined text-primary text-2xl group-hover:scale-110 transition-transform">calendar_month</span>
+              <span class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Timetable</span>
+            </a>
+            <a href="flashcards.html" class="bg-surface-container-high p-4 rounded-lg flex flex-col items-center gap-2 hover:bg-surface-container-highest transition-colors group">
+              <span class="material-symbols-outlined text-tertiary text-2xl group-hover:scale-110 transition-transform">style</span>
+              <span class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Flashcards</span>
+            </a>
+            <a href="chatbot.html" class="bg-surface-container-high p-4 rounded-lg flex flex-col items-center gap-2 hover:bg-surface-container-highest transition-colors group">
+              <span class="material-symbols-outlined text-secondary text-2xl group-hover:scale-110 transition-transform">smart_toy</span>
+              <span class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Assistant</span>
+            </a>
+            <a href="analytics.html" class="bg-surface-container-high p-4 rounded-lg flex flex-col items-center gap-2 hover:bg-surface-container-highest transition-colors group">
+              <span class="material-symbols-outlined text-primary-fixed-dim text-2xl group-hover:scale-110 transition-transform">insights</span>
+              <span class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Analytics</span>
+            </a>
+          </div>
+
+          <!-- Scholarly Insight -->
+          <div class="bg-gradient-to-br from-secondary-container to-surface-container-highest p-6 rounded-lg border border-primary/5">
+            <div class="flex items-center gap-3 mb-4">
+              <span class="material-symbols-outlined text-tertiary">lightbulb</span>
+              <h4 class="font-bold text-tertiary">Scholarly Insight</h4>
+            </div>
+            <p id="insight-text" class="text-sm text-on-secondary-container leading-relaxed italic">
+              "Loading insight..."
+            </p>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Add Deadline Modal -->
+  <div id="deadline-modal" class="modal-overlay">
+    <div class="bg-surface-container-high p-8 rounded-xl w-full max-w-md shadow-2xl">
+      <h3 class="text-xl font-bold mb-6">Add Deadline</h3>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs uppercase tracking-widest text-on-surface-variant mb-2">Title</label>
+          <input id="deadline-title" type="text" placeholder="e.g. Midterm Exam" class="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-lg py-3 px-4 text-on-surface focus:outline-none focus:border-primary/50"/>
+        </div>
+        <div>
+          <label class="block text-xs uppercase tracking-widest text-on-surface-variant mb-2">Subject</label>
+          <input id="deadline-subject" type="text" placeholder="e.g. Mathematics" class="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-lg py-3 px-4 text-on-surface focus:outline-none focus:border-primary/50"/>
+        </div>
+        <div>
+          <label class="block text-xs uppercase tracking-widest text-on-surface-variant mb-2">Due Date</label>
+          <input id="deadline-date" type="datetime-local" class="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-lg py-3 px-4 text-on-surface focus:outline-none focus:border-primary/50"/>
+        </div>
+      </div>
+      <div class="flex gap-3 mt-6">
+        <button id="deadline-cancel" class="flex-1 py-3 bg-surface-container-highest text-on-surface-variant rounded-lg font-bold text-sm">Cancel</button>
+        <button id="deadline-save" class="flex-1 py-3 bg-primary text-on-primary rounded-lg font-bold text-sm active:scale-95 transition-transform">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/store.js"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/gamification.js"></script>
+  <script src="js/flashcards.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Init navigation
+      Nav.init('side-session');
+
+      // Seed demo flashcard data
+      Flashcards.seedDemoData();
+
+      // Update streak
+      Store.updateStreak();
+
+      // ---- Populate Dashboard ----
+      const streak = Store.getStreak();
+      const points = Store.getPoints();
+      const goal = Store.getDailyGoal();
+      const today = Store.getTodayStats();
+
+      // Goal progress
+      const goalPct = Math.min(100, Math.round((goal.achieved / goal.target) * 100));
+      document.getElementById('goal-percent').textContent = goalPct + '%';
+      setTimeout(() => {
+        document.getElementById('goal-bar').style.width = goalPct + '%';
+      }, 300);
+      document.getElementById('hero-subtitle').textContent =
+        goalPct >= 100
+          ? "Outstanding! You've crushed your daily goal. Keep the momentum going!"
+          : `Your cognitive load is optimal today. You're ${goalPct}% through your daily knowledge goal.`;
+
+      // Streak & Points
+      document.getElementById('streak-count').textContent = streak.count + ' Days';
+      document.getElementById('points-count').textContent = points.toLocaleString() + ' pts';
+
+      // Recent Activity
+      const sessions = Store.getStudySessions().slice(0, 5);
+      const actList = document.getElementById('activity-list');
+      const noActivity = document.getElementById('no-activity');
+
+      if (sessions.length === 0) {
+        actList.classList.add('hidden');
+        noActivity.classList.remove('hidden');
+      } else {
+        const icons = ['history_edu', 'code', 'science', 'psychology', 'calculate', 'menu_book'];
+        actList.innerHTML = sessions.map((s, i) => {
+          const timeAgo = _timeAgo(s.date);
+          return `
+          <div class="group bg-surface-container-low hover:bg-surface-container-high transition-all p-5 rounded-lg flex items-center justify-between">
+            <div class="flex items-center gap-5">
+              <div class="w-12 h-12 rounded-lg bg-surface-container-highest flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-primary">${icons[i % icons.length]}</span>
+              </div>
+              <div>
+                <h4 class="font-bold text-[#e2dfff]">${s.subject}</h4>
+                <p class="text-sm text-[#c7c5d3]">${s.duration}m ${s.mode} session • ${timeAgo}</p>
+              </div>
+            </div>
+            <div class="text-right flex items-center gap-4">
+              <span class="px-3 py-1 bg-secondary-container text-on-secondary-container text-[10px] font-black rounded-full uppercase tracking-tighter">+${s.points} XP</span>
+              <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors">chevron_right</span>
+            </div>
+          </div>`;
+        }).join('');
+      }
+
+      // Deadlines
+      renderDeadlines();
+
+      // Insight
+      const insights = [
+        `"You've completed ${today.count} session${today.count !== 1 ? 's' : ''} today totaling ${today.totalMinutes} minutes. ${today.totalMinutes > 60 ? 'Excellent stamina!' : 'Keep going!'}"`,
+        '"Studies show that students who study at consistent times perform 23% better. Try setting a fixed schedule!"',
+        '"Active recall and spaced repetition are the two most evidence-backed study techniques. Use our Flashcards feature!"',
+        '"Taking a 10-minute break every 50 minutes improves concentration by up to 40%."',
+        `"You're on a ${streak.count}-day streak! ${streak.count >= 7 ? 'Amazing consistency!' : 'Keep it going to build a strong habit!'}"`,
+        '"The Pomodoro Technique (25 min study + 5 min break) is used by top students worldwide. Try our Focus Timer!"'
+      ];
+      document.getElementById('insight-text').textContent = insights[Math.floor(Math.random() * insights.length)];
+
+      // Deadline modal
+      const modal = document.getElementById('deadline-modal');
+      document.getElementById('add-deadline-btn').addEventListener('click', () => modal.classList.add('active'));
+      document.getElementById('deadline-cancel').addEventListener('click', () => modal.classList.remove('active'));
+      modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('active'); });
+      document.getElementById('deadline-save').addEventListener('click', () => {
+        const title = document.getElementById('deadline-title').value.trim();
+        const subject = document.getElementById('deadline-subject').value.trim();
+        const date = document.getElementById('deadline-date').value;
+        if (!title || !date) { Nav.showToast('Please fill in title and date', 'warning'); return; }
+        Store.addDeadline({ title, subject, due: new Date(date).toISOString() });
+        modal.classList.remove('active');
+        renderDeadlines();
+        Nav.showToast('Deadline added!', 'success');
+      });
+
+      // Check achievements
+      Gamification.checkAchievements();
+    });
+
+    function renderDeadlines() {
+      const deadlines = Store.getDeadlines();
+      const list = document.getElementById('deadlines-list');
+      if (deadlines.length === 0) {
+        list.innerHTML = '<div class="p-6 text-center text-on-surface-variant text-sm">No deadlines yet. Click + to add one.</div>';
+        return;
+      }
+      list.innerHTML = deadlines.slice(0, 5).map(d => {
+        const due = new Date(d.due);
+        const now = new Date();
+        const diff = due - now;
+        const hours = Math.floor(diff / 3600000);
+        let label, color;
+        if (hours < 0) { label = 'Overdue'; color = 'text-error'; }
+        else if (hours < 6) { label = `In ${hours}h`; color = 'text-error'; }
+        else if (hours < 24) { label = `In ${hours}h`; color = 'text-tertiary'; }
+        else if (hours < 48) { label = 'Tomorrow'; color = 'text-tertiary'; }
+        else { label = due.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); color = 'text-primary'; }
+        return `
+        <div class="p-5 group">
+          <div class="flex items-start justify-between mb-2">
+            <span class="text-xs font-bold ${color} uppercase tracking-widest">${label}</span>
+            <button onclick="removeDeadline('${d.id}')" class="material-symbols-outlined text-on-surface-variant text-sm opacity-0 group-hover:opacity-100 transition-opacity hover:text-error">delete</button>
+          </div>
+          <h5 class="font-bold mb-1">${d.title}</h5>
+          ${d.subject ? `<p class="text-xs text-on-surface-variant">${d.subject}</p>` : ''}
+        </div>`;
+      }).join('');
+    }
+
+    function removeDeadline(id) {
+      Store.removeDeadline(id);
+      renderDeadlines();
+      Nav.showToast('Deadline removed', 'info');
+    }
+
+    function _timeAgo(dateStr) {
+      const diff = Date.now() - new Date(dateStr).getTime();
+      const mins = Math.floor(diff / 60000);
+      if (mins < 1) return 'Just now';
+      if (mins < 60) return mins + 'm ago';
+      const hrs = Math.floor(mins / 60);
+      if (hrs < 24) return hrs + 'h ago';
+      const days = Math.floor(hrs / 24);
+      return days + 'd ago';
+    }
+  </script>
+</body>
+</html>

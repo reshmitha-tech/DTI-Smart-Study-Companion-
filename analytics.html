@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Scholarly | Analytics Dashboard</title>
+  <meta name="description" content="Track your study progress, review performance analytics, and monitor your learning streaks."/>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script>
+    tailwind.config={darkMode:"class",theme:{extend:{colors:{"primary-fixed":"#d4e3ff","surface-container":"#1a194a","secondary-fixed":"#e2dfff","inverse-on-surface":"#2b2b5b","surface":"#0d0b3d","error":"#ffb4ab","surface-container-lowest":"#070539","primary-container":"#002242","on-secondary-fixed-variant":"#3b3b94","inverse-primary":"#0060ac","tertiary":"#3cd7ff","outline":"#918f9d","on-surface":"#e2dfff","on-background":"#e2dfff","surface-bright":"#343465","on-primary-fixed-variant":"#004883","on-error-container":"#ffdad6","tertiary-container":"#00252f","secondary":"#c1c1ff","primary-fixed-dim":"#a4c9ff","on-primary-container":"#448bdc","primary":"#a4c9ff","on-tertiary-fixed":"#001f27","on-error":"#690005","secondary-container":"#3b3b94","error-container":"#93000a","on-tertiary":"#003642","secondary-fixed-dim":"#c1c1ff","surface-variant":"#2f2f60","surface-dim":"#0d0b3d","on-tertiary-container":"#0095b4","outline-variant":"#464651","on-secondary-fixed":"#0b016a","on-tertiary-fixed-variant":"#004e5f","on-secondary":"#24227d","on-primary":"#00315d","surface-tint":"#a4c9ff","on-surface-variant":"#c7c5d3","on-primary-fixed":"#001c39","tertiary-fixed-dim":"#3cd7ff","surface-container-high":"#242455","surface-container-low":"#161545","inverse-surface":"#e2dfff","background":"#0d0b3d","surface-container-highest":"#2f2f60","on-secondary-container":"#adadff","tertiary-fixed":"#b4ebff"},borderRadius:{DEFAULT:"0.25rem",lg:"0.5rem",xl:"0.75rem",full:"9999px"},fontFamily:{headline:["Manrope"],body:["Manrope"],label:["Manrope"]}}}};
+  </script>
+  <link rel="stylesheet" href="css/shared.css"/>
+</head>
+<body class="bg-surface text-on-surface min-h-screen overflow-x-hidden">
+
+  <div id="nav-mount"></div>
+  <div class="flex min-h-[calc(100vh-5rem)]">
+    <div id="sidebar-mount"></div>
+
+    <main class="flex-1 md:ml-72 p-6 md:p-12 overflow-y-auto">
+      <div class="max-w-6xl mx-auto">
+
+        <!-- Header -->
+        <div class="mb-12 animate-fade-in">
+          <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight text-primary-fixed mb-4">Analytics Dashboard</h1>
+          <p class="text-on-surface-variant text-lg max-w-2xl">Your comprehensive study performance data. Track progress, identify patterns, and optimize your learning strategy.</p>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12 animate-fade-in animate-fade-in-delay-1">
+          <div class="bg-surface-container-high p-6 rounded-xl">
+            <div class="flex items-center gap-2 mb-3">
+              <span class="material-symbols-outlined text-primary text-xl">schedule</span>
+              <span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Today</span>
+            </div>
+            <div id="stat-today" class="text-3xl font-black text-on-surface tracking-tighter">0m</div>
+          </div>
+          <div class="bg-surface-container-high p-6 rounded-xl">
+            <div class="flex items-center gap-2 mb-3">
+              <span class="material-symbols-outlined text-tertiary text-xl">date_range</span>
+              <span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">This Week</span>
+            </div>
+            <div id="stat-week" class="text-3xl font-black text-on-surface tracking-tighter">0m</div>
+          </div>
+          <div class="bg-surface-container-high p-6 rounded-xl">
+            <div class="flex items-center gap-2 mb-3">
+              <span class="material-symbols-outlined text-secondary text-xl">emoji_events</span>
+              <span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Total Points</span>
+            </div>
+            <div id="stat-points" class="text-3xl font-black text-on-surface tracking-tighter">0</div>
+          </div>
+          <div class="bg-surface-container-high p-6 rounded-xl">
+            <div class="flex items-center gap-2 mb-3">
+              <span class="material-symbols-outlined text-error text-xl" style="font-variation-settings:'FILL'1">local_fire_department</span>
+              <span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Streak</span>
+            </div>
+            <div id="stat-streak" class="text-3xl font-black text-on-surface tracking-tighter">0d</div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+          <!-- Left Column -->
+          <div class="lg:col-span-8 space-y-8">
+
+            <!-- Weekly Chart -->
+            <div class="bg-surface-container-low p-8 rounded-xl shadow-xl animate-fade-in animate-fade-in-delay-2">
+              <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-bold">Weekly Study Time</h3>
+                <span class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">Last 7 Days</span>
+              </div>
+              <div id="weekly-chart" class="bar-chart mb-8" style="height:180px"></div>
+              <div class="flex items-center gap-6 pt-4 border-t border-outline-variant/10">
+                <div class="flex items-center gap-2">
+                  <div class="w-3 h-3 rounded-sm bg-primary"></div>
+                  <span class="text-xs text-on-surface-variant">Today</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <div class="w-3 h-3 rounded-sm bg-primary/40"></div>
+                  <span class="text-xs text-on-surface-variant">Other days</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Subject Breakdown -->
+            <div class="bg-surface-container-low p-8 rounded-xl shadow-xl animate-fade-in animate-fade-in-delay-3">
+              <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-bold">Subject Breakdown</h3>
+                <span class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">All Time</span>
+              </div>
+              <div id="subject-bars"></div>
+              <div id="no-subjects" class="hidden text-center py-8 text-on-surface-variant">
+                <span class="material-symbols-outlined text-4xl mb-2 block opacity-30">bar_chart</span>
+                No subject data yet. Complete a study session to see breakdowns.
+              </div>
+            </div>
+
+            <!-- Session History -->
+            <div class="bg-surface-container-low p-8 rounded-xl shadow-xl">
+              <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-bold">Session History</h3>
+                <span id="session-count" class="text-xs font-bold text-on-surface-variant uppercase tracking-widest">0 Sessions</span>
+              </div>
+              <div id="session-table" class="space-y-2 max-h-80 overflow-y-auto"></div>
+              <div id="no-sessions" class="hidden text-center py-8 text-on-surface-variant">
+                <span class="material-symbols-outlined text-4xl mb-2 block opacity-30">history</span>
+                No sessions recorded yet.
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column -->
+          <div class="lg:col-span-4 space-y-8">
+
+            <!-- Streak Calendar -->
+            <div class="bg-surface-container-high p-6 rounded-xl shadow-xl animate-fade-in animate-fade-in-delay-2">
+              <h3 class="text-sm font-bold uppercase tracking-widest text-on-surface-variant mb-4 flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary text-lg">calendar_month</span>
+                30-Day Activity
+              </h3>
+              <div id="streak-calendar" class="grid grid-cols-7 gap-2"></div>
+              <div class="flex items-center gap-4 mt-4 pt-4 border-t border-outline-variant/10">
+                <div class="flex items-center gap-2">
+                  <div class="w-3 h-3 rounded-sm bg-surface-container-highest/30"></div>
+                  <span class="text-[10px] text-on-surface-variant">Inactive</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <div class="w-3 h-3 rounded-sm bg-primary/30"></div>
+                  <span class="text-[10px] text-on-surface-variant">Light</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <div class="w-3 h-3 rounded-sm bg-primary"></div>
+                  <span class="text-[10px] text-on-surface-variant">Intense</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Achievements -->
+            <div class="bg-surface-container-high p-6 rounded-xl shadow-xl">
+              <h3 class="text-sm font-bold uppercase tracking-widest text-on-surface-variant mb-4 flex items-center gap-2">
+                <span class="material-symbols-outlined text-tertiary text-lg" style="font-variation-settings:'FILL'1">workspace_premium</span>
+                Achievements
+              </h3>
+              <div id="achievements-list" class="space-y-3"></div>
+            </div>
+
+            <!-- All-Time Summary -->
+            <div class="bg-gradient-to-br from-primary-container to-surface-container-lowest p-6 rounded-xl border border-primary/10">
+              <h3 class="text-sm font-bold uppercase tracking-widest text-primary mb-4">All-Time Summary</h3>
+              <div class="space-y-3">
+                <div class="flex justify-between items-center">
+                  <span class="text-sm text-on-surface-variant">Total Study Time</span>
+                  <span id="total-time" class="font-bold text-on-surface">0m</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm text-on-surface-variant">Total Sessions</span>
+                  <span id="total-sessions" class="font-bold text-on-surface">0</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm text-on-surface-variant">Total Points</span>
+                  <span id="total-pts" class="font-bold text-primary">0</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm text-on-surface-variant">Longest Streak</span>
+                  <span id="longest-streak" class="font-bold text-tertiary">0d</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/store.js"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/gamification.js"></script>
+  <script src="js/analytics.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      Nav.init('side-session');
+
+      const stats = Analytics.getTotalStats();
+
+      // Summary cards
+      document.getElementById('stat-today').textContent = Analytics.formatDuration(stats.today);
+      document.getElementById('stat-week').textContent = Analytics.formatDuration(stats.thisWeek);
+      document.getElementById('stat-points').textContent = stats.totalPoints.toLocaleString();
+      document.getElementById('stat-streak').textContent = stats.streak + 'd';
+
+      // Weekly chart
+      const weekData = Analytics.getWeeklyData();
+      Analytics.renderBarChart(document.getElementById('weekly-chart'), weekData);
+
+      // Subject breakdown
+      const subjects = Analytics.getSubjectBreakdown();
+      if (subjects.length > 0) {
+        Analytics.renderSubjectBars(document.getElementById('subject-bars'), subjects);
+      } else {
+        document.getElementById('no-subjects').classList.remove('hidden');
+      }
+
+      // Streak calendar
+      const calendar = Analytics.getStreakCalendar();
+      Analytics.renderStreakCalendar(document.getElementById('streak-calendar'), calendar);
+
+      // Session history
+      const sessions = Store.getStudySessions();
+      document.getElementById('session-count').textContent = sessions.length + ' Sessions';
+      if (sessions.length > 0) {
+        const table = document.getElementById('session-table');
+        table.innerHTML = sessions.slice(0, 30).map(s => {
+          const date = new Date(s.date);
+          const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+          const timeStr = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+          return `
+          <div class="flex items-center justify-between p-3 bg-surface-container-highest/30 rounded-lg hover:bg-surface-container-highest/50 transition-colors">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-lg bg-surface-container-highest flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-primary text-sm">${s.type === 'flashcard' ? 'style' : 'timer'}</span>
+              </div>
+              <div>
+                <span class="text-sm font-bold">${s.subject}</span>
+                <span class="text-[10px] text-on-surface-variant block">${dateStr} at ${timeStr}</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="text-xs text-on-surface-variant">${s.duration}m</span>
+              <span class="text-[10px] font-bold text-primary bg-primary/10 px-2 py-1 rounded-full">+${s.points}XP</span>
+            </div>
+          </div>`;
+        }).join('');
+      } else {
+        document.getElementById('no-sessions').classList.remove('hidden');
+      }
+
+      // Achievements
+      const allAch = Gamification.getAllAchievements();
+      const unlockedIds = Store.getAchievements().map(a => a.id);
+      document.getElementById('achievements-list').innerHTML = allAch.map(ach => {
+        const unlocked = unlockedIds.includes(ach.id);
+        return `
+        <div class="flex items-center gap-3 p-3 rounded-lg ${unlocked ? 'bg-primary/10 border border-primary/20' : 'bg-surface-container-highest/20 opacity-50'}">
+          <span class="material-symbols-outlined ${unlocked ? 'text-primary' : 'text-on-surface-variant'}" style="font-variation-settings:'FILL'${unlocked ? 1 : 0}">${ach.icon}</span>
+          <div>
+            <div class="text-sm font-bold ${unlocked ? 'text-on-surface' : 'text-on-surface-variant'}">${ach.title}</div>
+            <div class="text-[10px] text-on-surface-variant">${ach.desc}</div>
+          </div>
+          ${unlocked ? '<span class="material-symbols-outlined text-primary text-sm ml-auto" style="font-variation-settings:\'FILL\'1">check_circle</span>' : ''}
+        </div>`;
+      }).join('');
+
+      // All-time summary
+      document.getElementById('total-time').textContent = Analytics.formatDuration(stats.allTime);
+      document.getElementById('total-sessions').textContent = stats.totalSessions;
+      document.getElementById('total-pts').textContent = stats.totalPoints.toLocaleString();
+      document.getElementById('longest-streak').textContent = stats.streak + 'd';
+    });
+  </script>
+</body>
+</html>

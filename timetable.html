@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Scholarly | Timetable Generator</title>
+  <meta name="description" content="AI-driven timetable generator. Input your subjects and available hours to create a personalized weekly study schedule."/>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script>
+    tailwind.config={darkMode:"class",theme:{extend:{colors:{"primary-fixed":"#d4e3ff","surface-container":"#1a194a","secondary-fixed":"#e2dfff","inverse-on-surface":"#2b2b5b","surface":"#0d0b3d","error":"#ffb4ab","surface-container-lowest":"#070539","primary-container":"#002242","on-secondary-fixed-variant":"#3b3b94","inverse-primary":"#0060ac","tertiary":"#3cd7ff","outline":"#918f9d","on-surface":"#e2dfff","on-background":"#e2dfff","surface-bright":"#343465","on-primary-fixed-variant":"#004883","on-error-container":"#ffdad6","tertiary-container":"#00252f","secondary":"#c1c1ff","primary-fixed-dim":"#a4c9ff","on-primary-container":"#448bdc","primary":"#a4c9ff","on-tertiary-fixed":"#001f27","on-error":"#690005","secondary-container":"#3b3b94","error-container":"#93000a","on-tertiary":"#003642","secondary-fixed-dim":"#c1c1ff","surface-variant":"#2f2f60","surface-dim":"#0d0b3d","on-tertiary-container":"#0095b4","outline-variant":"#464651","on-secondary-fixed":"#0b016a","on-tertiary-fixed-variant":"#004e5f","on-secondary":"#24227d","on-primary":"#00315d","surface-tint":"#a4c9ff","on-surface-variant":"#c7c5d3","on-primary-fixed":"#001c39","tertiary-fixed-dim":"#3cd7ff","surface-container-high":"#242455","surface-container-low":"#161545","inverse-surface":"#e2dfff","background":"#0d0b3d","surface-container-highest":"#2f2f60","on-secondary-container":"#adadff","tertiary-fixed":"#b4ebff"},borderRadius:{DEFAULT:"0.25rem",lg:"0.5rem",xl:"0.75rem",full:"9999px"},fontFamily:{headline:["Manrope"],body:["Manrope"],label:["Manrope"]}}}};
+  </script>
+  <link rel="stylesheet" href="css/shared.css"/>
+</head>
+<body class="bg-surface font-body text-on-surface overflow-x-hidden">
+
+  <div id="nav-mount"></div>
+  <div class="flex min-h-[calc(100vh-5rem)]">
+    <div id="sidebar-mount"></div>
+
+    <section class="flex-1 md:ml-72 p-6 md:p-12 overflow-y-auto">
+      <div class="max-w-6xl mx-auto">
+
+        <!-- Header -->
+        <div class="mb-12 animate-fade-in">
+          <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight text-primary-fixed mb-4">Timetable Generator</h1>
+          <p class="text-on-surface-variant text-lg max-w-2xl">Engineer your academic success with our smart scheduler. Input your subjects and available hours to generate a high-performance weekly ritual.</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+          <!-- Parameter Panel -->
+          <div class="lg:col-span-4 bg-surface-container-low p-8 rounded-lg shadow-[0_20px_40px_-15px_rgba(13,11,61,0.4)] animate-fade-in animate-fade-in-delay-1">
+            <h2 class="text-xs uppercase tracking-[0.1em] text-primary mb-6 flex items-center gap-2 font-bold">
+              <span class="material-symbols-outlined">tune</span> Parameters
+            </h2>
+            <div class="space-y-6">
+              <!-- Subjects -->
+              <div>
+                <label class="block text-xs uppercase tracking-widest text-on-surface-variant mb-2">Academic Subjects</label>
+                <div id="subject-tags" class="flex flex-wrap gap-2 mb-3"></div>
+                <div class="relative">
+                  <input id="subject-input" type="text" placeholder="Add subject..."
+                    class="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-lg py-3 px-4 text-on-surface focus:outline-none focus:border-primary/50 transition-colors"/>
+                  <button id="add-subject-btn" class="absolute right-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-primary hover:scale-110 transition-transform">add_circle</button>
+                </div>
+              </div>
+
+              <!-- Daily Hours -->
+              <div>
+                <label class="block text-xs uppercase tracking-widest text-on-surface-variant mb-2">Daily Study Cap (Hours)</label>
+                <input id="hours-slider" type="range" min="1" max="12" value="6"
+                  class="w-full accent-primary bg-surface-container-highest rounded-lg h-2 cursor-pointer"/>
+                <div class="flex justify-between mt-2">
+                  <span class="text-[10px] font-bold text-on-surface-variant">1 HR</span>
+                  <span id="hours-value" class="text-sm font-black text-primary">6 HOURS</span>
+                  <span class="text-[10px] font-bold text-on-surface-variant">12 HR</span>
+                </div>
+              </div>
+
+              <!-- Intensity -->
+              <div>
+                <label class="block text-xs uppercase tracking-widest text-on-surface-variant mb-2">Focus Intensity</label>
+                <div class="grid grid-cols-3 gap-2" id="intensity-btns">
+                  <button data-val="steady" class="intensity-btn bg-surface-container-highest text-[10px] font-bold p-3 rounded-lg border border-outline-variant/10 text-on-surface-variant hover:border-primary transition-all">STEADY</button>
+                  <button data-val="peak" class="intensity-btn bg-primary text-on-primary text-[10px] font-bold p-3 rounded-lg border-transparent shadow-lg shadow-primary/20">PEAK</button>
+                  <button data-val="grind" class="intensity-btn bg-surface-container-highest text-[10px] font-bold p-3 rounded-lg border border-outline-variant/10 text-on-surface-variant hover:border-primary transition-all">GRIND</button>
+                </div>
+              </div>
+
+              <button id="generate-btn"
+                class="w-full bg-gradient-to-br from-primary to-on-primary-container p-4 rounded-lg text-on-primary font-black uppercase tracking-[0.2em] shadow-xl shadow-primary/10 active:scale-95 duration-200 mt-4">
+                Generate Schedule
+              </button>
+            </div>
+          </div>
+
+          <!-- Timetable Grid -->
+          <div class="lg:col-span-8 animate-fade-in animate-fade-in-delay-2">
+            <div class="bg-surface-container-low rounded-lg overflow-hidden shadow-[0_40px_80px_-30px_rgba(13,11,61,0.7)]">
+              <div class="p-6 bg-surface-container-high flex justify-between items-center">
+                <h3 class="text-xl font-bold text-on-surface tracking-tight">Active Weekly Plan</h3>
+                <div class="flex gap-2">
+                  <button id="download-btn" class="bg-surface-container-highest p-2 rounded-lg text-primary hover:bg-surface-bright transition-colors" title="Download">
+                    <span class="material-symbols-outlined">file_download</span>
+                  </button>
+                </div>
+              </div>
+              <div id="timetable-grid" class="p-1 grid grid-cols-8 gap-1 bg-surface-container-highest/20">
+                <!-- Populated by JS -->
+              </div>
+            </div>
+
+            <!-- Insight Cards -->
+            <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="bg-surface-container-highest/40 backdrop-blur-md p-6 rounded-lg border border-outline-variant/10">
+                <div class="flex items-center gap-4 mb-4">
+                  <div class="bg-primary/20 w-12 h-12 rounded-lg flex items-center justify-center">
+                    <span class="material-symbols-outlined text-primary">insights</span>
+                  </div>
+                  <div>
+                    <h4 class="font-bold text-on-surface">Efficiency Analysis</h4>
+                    <p class="text-xs text-on-surface-variant">Optimal study blocks detected.</p>
+                  </div>
+                </div>
+                <div class="h-2 bg-surface-container rounded-full overflow-hidden">
+                  <div id="efficiency-bar" class="h-full bg-primary rounded-full shadow-[0_0_10px_rgba(164,201,255,0.4)] transition-all duration-1000" style="width: 0%"></div>
+                </div>
+                <div class="mt-3 flex justify-between text-[10px] font-bold text-primary tracking-widest">
+                  <span>PROJECTED FOCUS</span>
+                  <span id="efficiency-pct">0%</span>
+                </div>
+              </div>
+              <div class="bg-surface-container-highest/40 backdrop-blur-md p-6 rounded-lg border border-outline-variant/10">
+                <div class="flex items-center gap-4 mb-4">
+                  <div class="bg-tertiary/20 w-12 h-12 rounded-lg flex items-center justify-center">
+                    <span class="material-symbols-outlined text-tertiary">bedtime</span>
+                  </div>
+                  <div>
+                    <h4 class="font-bold text-on-surface">Circadian Alignment</h4>
+                    <p class="text-xs text-on-surface-variant">Rest periods are well-distributed.</p>
+                  </div>
+                </div>
+                <div id="circadian-dots" class="flex gap-1">
+                  <div class="flex-1 h-2 bg-tertiary rounded-full"></div>
+                  <div class="flex-1 h-2 bg-tertiary rounded-full"></div>
+                  <div class="flex-1 h-2 bg-tertiary/20 rounded-full"></div>
+                  <div class="flex-1 h-2 bg-tertiary/20 rounded-full"></div>
+                </div>
+                <div class="mt-3 flex justify-between text-[10px] font-bold text-tertiary tracking-widest">
+                  <span>SLEEP HYGIENE</span>
+                  <span>OPTIMAL</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="js/store.js"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/gamification.js"></script>
+  <script src="js/timetable.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      Nav.init('side-session');
+
+      // State
+      const settings = Store.getSettings();
+      let subjects = [...settings.subjects];
+      let intensity = 'peak';
+      let dailyHours = 6;
+
+      // --- Render subject tags ---
+      function renderTags() {
+        document.getElementById('subject-tags').innerHTML = subjects.map(s =>
+          `<span class="bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">
+            ${s} <span class="material-symbols-outlined text-[12px] cursor-pointer hover:text-error transition-colors" onclick="removeSubject('${s}')">close</span>
+          </span>`
+        ).join('');
+      }
+      renderTags();
+
+      // Add subject
+      const subInput = document.getElementById('subject-input');
+      function addSubject() {
+        const val = subInput.value.trim();
+        if (val && !subjects.includes(val)) {
+          subjects.push(val);
+          subInput.value = '';
+          renderTags();
+          settings.subjects = subjects;
+          Store.saveSettings(settings);
+        }
+      }
+      document.getElementById('add-subject-btn').addEventListener('click', addSubject);
+      subInput.addEventListener('keydown', e => { if (e.key === 'Enter') addSubject(); });
+      window.removeSubject = (s) => {
+        subjects = subjects.filter(x => x !== s);
+        renderTags();
+        settings.subjects = subjects;
+        Store.saveSettings(settings);
+      };
+
+      // Hours slider
+      const slider = document.getElementById('hours-slider');
+      const hoursLabel = document.getElementById('hours-value');
+      slider.addEventListener('input', () => {
+        dailyHours = parseInt(slider.value);
+        hoursLabel.textContent = dailyHours + ' HOURS';
+      });
+
+      // Intensity buttons
+      document.querySelectorAll('.intensity-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.intensity-btn').forEach(b => {
+            b.className = 'intensity-btn bg-surface-container-highest text-[10px] font-bold p-3 rounded-lg border border-outline-variant/10 text-on-surface-variant hover:border-primary transition-all';
+          });
+          btn.className = 'intensity-btn bg-primary text-on-primary text-[10px] font-bold p-3 rounded-lg border-transparent shadow-lg shadow-primary/20';
+          intensity = btn.dataset.val;
+        });
+      });
+
+      // Generate
+      document.getElementById('generate-btn').addEventListener('click', () => {
+        if (subjects.length === 0) {
+          Nav.showToast('Please add at least one subject!', 'warning');
+          return;
+        }
+        const tt = TimetableGen.generate(subjects, dailyHours, intensity);
+        renderTimetable(tt);
+        Nav.showToast('Timetable generated!', 'success');
+      });
+
+      // Render existing or generate default
+      function renderTimetable(tt) {
+        TimetableGen.renderGrid(tt, document.getElementById('timetable-grid'));
+        const eff = TimetableGen.getEfficiencyScore(tt);
+        document.getElementById('efficiency-pct').textContent = eff + '%';
+        setTimeout(() => {
+          document.getElementById('efficiency-bar').style.width = eff + '%';
+        }, 300);
+      }
+
+      const existing = Store.getTimetable();
+      if (existing) {
+        renderTimetable(existing);
+        if (existing.subjects) subjects = existing.subjects;
+        renderTags();
+      } else if (subjects.length > 0) {
+        renderTimetable(TimetableGen.generate(subjects, dailyHours, intensity));
+      }
+
+      // Download as text
+      document.getElementById('download-btn').addEventListener('click', () => {
+        const tt = Store.getTimetable();
+        if (!tt) { Nav.showToast('Generate a timetable first', 'warning'); return; }
+        let text = 'SCHOLARLY WEEKLY TIMETABLE\n';
+        text += '========================\n\n';
+        TimetableGen.DAYS.forEach(day => {
+          text += `--- ${day} ---\n`;
+          TimetableGen.TIME_SLOTS.forEach(slot => {
+            const cell = tt.grid[`${day}_${slot}`];
+            text += `  ${slot}: ${cell ? cell.subject : '—'}\n`;
+          });
+          text += '\n';
+        });
+        const blob = new Blob([text], { type: 'text/plain' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'scholarly_timetable.txt';
+        a.click();
+        Nav.showToast('Timetable downloaded!', 'success');
+      });
+    });
+  </script>
+</body>
+</html>
