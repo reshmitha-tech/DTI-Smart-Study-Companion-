@@ -83,7 +83,10 @@ To enable advanced AI responses:
 1. Create a `.env` file in the project root
 2. API_KEY=your_api_key_here
 
-2. Install dotenv  
+2. Install dotenv
+
+---
+
 bash
 pip install python-dotenv
 Update backend code to load API key securely
@@ -124,17 +127,17 @@ http://127.0.0.1:5000/
 
 
 🌟 Key Highlights
-Priority-based study planning
-Focus and distraction tracking
-Real-time progress analytics
-Gamification with streaks and rewards
-Works with  API integration
+- Priority-based study planning
+- Focus and distraction tracking
+- Real-time progress analytics
+- Gamification with streaks and rewards
+- Works with  API integration
 
 
 🚀 Future Enhancements
-Fully AI-powered chatbot
-proper working of chatbot
-Mobile application
-Cloud database integration
-Voice assistant
-Advanced analytics
+- Fully AI-powered chatbot
+- proper working of chatbot
+- Mobile application
+- Cloud database integration
+- Voice assistant
+- Advanced analytics
